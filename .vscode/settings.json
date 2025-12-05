@@ -1,0 +1,88 @@
+{
+  // =========================
+  // ⚙️ Formatação e estilo
+  // =========================
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.wordWrap": "on",
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.autoSave": "onWindowChange",
+
+  // =========================
+  // 🎨 Formatadores padrão
+  // =========================
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascriptreact]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  // =========================
+  // 🧩 ESLint — Flat Config
+  // =========================
+  "eslint.enable": true,
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["typescript", "typescriptreact", "javascript", "javascriptreact"],
+  "eslint.alwaysShowStatus": true,
+  "eslint.lintFilesOnStartup": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.options": {
+    "overrideConfigFile": ".eslint.config.mjs"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "always"
+  },
+
+  // =========================
+  // 🧠 TypeScript — análise global
+  // =========================
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.validate.enable": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.tsserver.maxProjectFileCount": 2000,
+  "typescript.tsserver.log": "off",
+  "typescript.disableAutomaticTypeAcquisition": false,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.suggestionActions.enabled": true,
+  "typescript.suggestionActions.enabled": true,
+
+  // =========================
+  // 🧰 Sugestões e atalhos
+  // =========================
+  "editor.quickSuggestions": { "strings": true },
+
+  // =========================
+  // 💨 Tailwind (se usado)
+  // =========================
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.includeLanguages": {
+    "typescriptreact": "html",
+    "javascriptreact": "html"
+  },
+
+  // =========================
+  // 💻 Terminal
+  // =========================
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "terminal.integrated.scrollback": 5000,
+
+  // =========================
+  // 🔌 Extensões recomendadas
+  // =========================
+  "extensions.ignoreRecommendations": false,
+  "extensions.recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "yoavbls.pretty-ts-errors"
+  ]
+}
