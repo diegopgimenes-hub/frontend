@@ -7,9 +7,9 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ============================
+// ===============================
 // 📘 Tipos
-// ============================
+// ===============================
 export interface User {
   id: number;
   username: string;
@@ -40,27 +40,26 @@ export interface Role {
   name: string;
 }
 
-// ============================
-// 🧩 Users CRUD
-// ============================
-
+// ===============================
+// 👤 Users API
+// ===============================
 export async function getUsers(): Promise<User[]> {
-  const res = await api.get("/admin/users");
+  const res = await api.get<User[]>("/admin/users");
   return res.data;
 }
 
-export async function getUser(id: number): Promise<User> {
-  const res = await api.get(`/admin/users/${id}`);
+export async function getUserById(id: number): Promise<User> {
+  const res = await api.get<User>(`/admin/users/${id}`);
   return res.data;
 }
 
 export async function createUser(user: CreateUserRequest): Promise<User> {
-  const res = await api.post("/admin/users", user);
+  const res = await api.post<User>("/admin/users", user);
   return res.data;
 }
 
 export async function updateUser(id: number, user: UpdateUserRequest): Promise<User> {
-  const res = await api.put(`/admin/users/${id}`, user);
+  const res = await api.put<User>(`/admin/users/${id}`, user);
   return res.data;
 }
 
@@ -68,21 +67,17 @@ export async function deleteUser(id: number): Promise<void> {
   await api.delete(`/admin/users/${id}`);
 }
 
-// ============================
-// 🧩 Roles API (restaurado)
-// ============================
-
 export async function getRoles(): Promise<Role[]> {
-  const res = await api.get("/admin/roles");
+  const res = await api.get<Role[]>("/admin/roles");
   return res.data;
 }
 
-// ============================
-// ✅ Export default para conveniência
-// ============================
+// ===============================
+// ✅ Export padrão e nomeado
+// ===============================
 export default {
   getUsers,
-  getUser,
+  getUserById,
   createUser,
   updateUser,
   deleteUser,

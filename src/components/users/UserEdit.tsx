@@ -1,4 +1,4 @@
-import getUserById from "@/api/userApi";
+import { getUserById, type User } from "@/api/userApi";
 import PageContainer from "@/components/common/PageContainer";
 import EditIcon from "@mui/icons-material/Edit";
 import { Alert, Box, CircularProgress } from "@mui/material";
@@ -14,12 +14,21 @@ export default function UserEdit() {
 
   useEffect(() => {
     if (!id) return;
-    setIsLoading(true);
-    setError(null);
-    getUserById(Number(id))
-      .then(data => setUser(data))
-      .catch(err => setError(err as Error))
-      .finally(() => setIsLoading(false));
+
+    const fetchUser = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getUserById(Number(id));
+        setUser(data);
+      } catch (err) {
+        setError(err as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUser();
   }, [id]);
 
   return (

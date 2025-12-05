@@ -1,4 +1,4 @@
-import { deleteUser, getUser, type User } from "@/api/userApi";
+import { deleteUser, getUserById, type User } from "@/api/userApi";
 import PageContainer from "@/components/common/PageContainer";
 import { useDialogs } from "@/hooks/useDialogs/DialogsContext";
 import { useNotifications } from "@/hooks/useNotifications/NotificationsContext";
@@ -28,7 +28,7 @@ export default function UserShow() {
     async function loadUser() {
       try {
         if (id) {
-          const data = await getUser(Number(id));
+          const data = await getUserById(Number(id));
           setUser({
             ...data,
             roles: Array.isArray(data.roles) ? data.roles : [],
