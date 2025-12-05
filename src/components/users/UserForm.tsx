@@ -4,7 +4,8 @@ import { Box, Button, FormControlLabel, Switch, TextField } from "@mui/material"
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface UserFormData {
+// ✅ Interface de dados específicos para o formulário
+export interface UserFormData {
   username: string;
   email: string;
   password: string;
@@ -12,6 +13,7 @@ interface UserFormData {
   roles: string[];
 }
 
+// ✅ Props aceitas pelo formulário
 interface UserFormProps {
   initialData?: Partial<UserFormData>;
   onSubmitSuccess?: () => void;
@@ -22,27 +24,30 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     username: initialData?.username ?? "",
     email: initialData?.email ?? "",
     password: initialData?.password ?? "",
-    enabled: initialData?.enabled ?? false,
+    enabled: initialData?.enabled ?? true, // ✅ apenas este começa true
     roles: initialData?.roles ?? [],
   });
 
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const notifications = useNotifications();
   const navigate = useNavigate();
 
+  // 🔹 Atualiza campos de texto
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setForm(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
+  // 🔹 Atualiza o switch de “Ativo”
   const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, enabled: e.target.checked }));
+    setForm(prev => ({ ...prev, enabled: e.target.checked }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // 🔹 Envio do formulário
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrors({});
@@ -50,19 +55,32 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     try {
       await createUser(form);
       notifications.show("Usuário criado com sucesso!", { severity: "success" });
+
       if (onSubmitSuccess) onSubmitSuccess();
       else navigate("/users");
-    } catch (error: any) {
-      if (error.response?.status === 409 && error.response?.data) {
-        const { field, message } = error.response.data;
-        if (field && message) setErrors({ [field]: message });
+    } catch (error: unknown) {
+      if (axiosError(error)) {
+        const status = error.response?.status;
+
+        if (status === 409 && typeof error.response?.data === "object") {
+          const { field, message } = error.response.data as { field?: string; message?: string };
+          if (field && message) setErrors({ [field]: message });
+        } else if (status === 400 && typeof error.response?.data === "string") {
+          notifications.show(error.response.data, { severity: "error" });
+        } else {
+          notifications.show("Erro ao criar usuário.", { severity: "error" });
+        }
       } else {
-        notifications.show("Erro ao criar usuário.", { severity: "error" });
+        notifications.show("Erro inesperado ao criar usuário.", { severity: "error" });
       }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // 🔸 Helper: garante tipo AxiosError
+  const axiosError = (error: unknown): error is import("axios").AxiosError =>
+    typeof error === "object" && !!error && "isAxiosError" in error;
 
   return (
     <Box
@@ -112,12 +130,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         label="Ativo"
       />
 
-      <Button
-        variant="contained"
-        type="submit"
-        disabled={isSubmitting}
-        sx={{ mt: 2 }}
-      >
+      <Button variant="contained" type="submit" disabled={isSubmitting} sx={{ mt: 2 }}>
         {isSubmitting ? "Salvando..." : "Salvar"}
       </Button>
     </Box>

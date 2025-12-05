@@ -1,15 +1,18 @@
 import PageContainer from "@/components/common/PageContainer";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import AddIcon from "@mui/icons-material/Add";
+import { Box } from "@mui/material";
 import UserForm from "./UserForm";
 
 export default function UserCreate() {
   return (
     <PageContainer
       title="Novo Usuário"
-      icon={<PersonAddIcon />}
+      icon={<AddIcon />}
       breadcrumbs={[{ title: "Usuários", path: "/users" }, { title: "Novo" }]}
     >
-      <UserForm />
+      <Box sx={{ maxWidth: 600, mx: "auto", mt: 2 }}>
+        <UserForm /> {/* ✅ sem initialData */}
+      </Box>
     </PageContainer>
   );
 }
