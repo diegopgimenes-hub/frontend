@@ -6,7 +6,6 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -48,13 +47,6 @@ export default function UserList() {
     if (!isLoading) loadUsers();
   }, [isLoading, loadUsers]);
 
-  const handleRowClick = React.useCallback(
-    ({ row }: any) => {
-      navigate(`/users/${row.id}`);
-    },
-    [navigate],
-  );
-
   const handleCreateClick = React.useCallback(() => {
     navigate("/users/new");
   }, [navigate]);
@@ -83,10 +75,13 @@ export default function UserList() {
           });
           loadUsers();
         } catch (deleteError) {
-          notifications.show(`Erro ao excluir usuário: ${(deleteError as Error).message}`, {
-            severity: "error",
-            autoHideDuration: 3000,
-          });
+          notifications.show(
+            `Erro ao excluir usuário: ${(deleteError as Error).message}`,
+            {
+              severity: "error",
+              autoHideDuration: 3000,
+            },
+          );
         }
         setIsLoading(false);
       }
@@ -103,13 +98,14 @@ export default function UserList() {
         field: "roles",
         headerName: "Perfis",
         flex: 1,
-        valueGetter: (_value, row) => (Array.isArray(row.roles) ? row.roles.join(", ") : ""),
+        valueGetter: (_value, row) =>
+          Array.isArray(row.roles) ? row.roles.join(", ") : "",
       },
       {
         field: "enabled",
         headerName: "Ativo",
         width: 120,
-        renderCell: params => (params.row.enabled ? "Sim" : "Não"),
+        renderCell: (params) => (params.row.enabled ? "Sim" : "Não"),
       },
       {
         field: "actions",
@@ -117,12 +113,6 @@ export default function UserList() {
         flex: 1,
         align: "right",
         getActions: ({ row }) => [
-          <GridActionsCellItem
-            key="view-item"
-            icon={<VisibilityIcon />}
-            label="Visualizar"
-            onClick={() => navigate(`/users/${row.id}`)}
-          />,
           <GridActionsCellItem
             key="edit-item"
             icon={<EditIcon />}
@@ -134,12 +124,11 @@ export default function UserList() {
             icon={<DeleteIcon />}
             label="Excluir"
             onClick={handleRowDelete(row)}
-            showInMenu
           />,
         ],
       },
     ],
-    [handleRowEdit, handleRowDelete, navigate],
+    [handleRowEdit, handleRowDelete],
   );
 
   return (
@@ -171,7 +160,6 @@ export default function UserList() {
             rows={rows}
             columns={columns}
             disableRowSelectionOnClick
-            onRowClick={handleRowClick}
             loading={isLoading}
             initialState={{
               pagination: { paginationModel: { pageSize: INITIAL_PAGE_SIZE } },

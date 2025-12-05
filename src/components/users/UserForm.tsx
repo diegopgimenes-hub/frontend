@@ -12,13 +12,18 @@ interface UserFormData {
   roles: string[];
 }
 
-export default function UserForm() {
+interface UserFormProps {
+  initialData?: Partial<UserFormData>;
+  onSubmitSuccess?: () => void;
+}
+
+export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps) {
   const [form, setForm] = useState<UserFormData>({
-    username: "",
-    email: "",
-    password: "",
-    enabled: true,
-    roles: [],
+    username: initialData?.username ?? "",
+    email: initialData?.email ?? "",
+    password: initialData?.password ?? "",
+    enabled: initialData?.enabled ?? false,
+    roles: initialData?.roles ?? [],
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -27,14 +32,14 @@ export default function UserForm() {
   const notifications = useNotifications();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: "" })); // limpa erro ao editar
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, enabled: e.target.checked }));
+    setForm((prev) => ({ ...prev, enabled: e.target.checked }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,26 +50,12 @@ export default function UserForm() {
     try {
       await createUser(form);
       notifications.show("Usuário criado com sucesso!", { severity: "success" });
-      navigate("/users");
+      if (onSubmitSuccess) onSubmitSuccess();
+      else navigate("/users");
     } catch (error: any) {
-      // ✅ Detecta resposta de conflito do backend (409)
       if (error.response?.status === 409 && error.response?.data) {
         const { field, message } = error.response.data;
-
-        if (field && message) {
-          // mostra erro no campo correto
-          setErrors({ [field]: message });
-        } else if (typeof error.response.data === "string") {
-          notifications.show(error.response.data, { severity: "error" });
-        } else {
-          notifications.show("Erro de conflito ao criar usuário.", {
-            severity: "error",
-          });
-        }
-      } else if (error.response?.status === 400) {
-        notifications.show("Preencha todos os campos obrigatórios.", {
-          severity: "warning",
-        });
+        if (field && message) setErrors({ [field]: message });
       } else {
         notifications.show("Erro ao criar usuário.", { severity: "error" });
       }
@@ -121,7 +112,12 @@ export default function UserForm() {
         label="Ativo"
       />
 
-      <Button variant="contained" type="submit" disabled={isSubmitting} sx={{ mt: 2 }}>
+      <Button
+        variant="contained"
+        type="submit"
+        disabled={isSubmitting}
+        sx={{ mt: 2 }}
+      >
         {isSubmitting ? "Salvando..." : "Salvar"}
       </Button>
     </Box>
