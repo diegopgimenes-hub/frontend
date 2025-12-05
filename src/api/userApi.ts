@@ -7,9 +7,9 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ===============================
+// ==========
 // 📘 Tipos
-// ===============================
+// ==========
 export interface User {
   id: number;
   username: string;
@@ -40,9 +40,9 @@ export interface Role {
   name: string;
 }
 
-// ===============================
-// 👤 Users API
-// ===============================
+// ==========
+// ⚙️ Users API
+// ==========
 export async function getUsers(): Promise<User[]> {
   const res = await api.get<User[]>("/admin/users");
   return res.data;
@@ -54,12 +54,15 @@ export async function getUserById(id: number): Promise<User> {
 }
 
 export async function createUser(user: CreateUserRequest): Promise<User> {
-  const res = await api.post<User>("/admin/users", user);
+  // 🔒 Correção: clonar o objeto para evitar mutação do estado React
+  const payload = { ...user };
+  const res = await api.post<User>("/admin/users", payload);
   return res.data;
 }
 
 export async function updateUser(id: number, user: UpdateUserRequest): Promise<User> {
-  const res = await api.put<User>(`/admin/users/${id}`, user);
+  const payload = { ...user };
+  const res = await api.put<User>(`/admin/users/${id}`, payload);
   return res.data;
 }
 
@@ -72,9 +75,7 @@ export async function getRoles(): Promise<Role[]> {
   return res.data;
 }
 
-// ===============================
-// ✅ Export padrão e nomeado
-// ===============================
+// ==========
 export default {
   getUsers,
   getUserById,

@@ -33,7 +33,10 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🧠 Reset proativo baseado na URL e nos dados
+  // 🔍 Log de depuração
+  console.error(">>> PROPS RECEBIDAS:", { initialData });
+
+  // 🔁 Reset baseado em rota
   useEffect(() => {
     const path = location.pathname;
     const isNew = path.endsWith("/new");
@@ -41,7 +44,6 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     console.error("UserForm effect triggered for:", location.pathname, "isNew:", isNew);
 
     if (isNew) {
-      // 🔹 Criação → sempre limpa
       setForm({
         username: "",
         email: "",
@@ -50,7 +52,6 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         roles: [],
       });
     } else if (initialData && Object.keys(initialData).length > 0) {
-      // 🔹 Edição → popula
       setForm({
         username: initialData.username ?? "",
         email: initialData.email ?? "",
@@ -61,36 +62,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     }
   }, [location.pathname, initialData]);
 
-  // 🔥 Reset extra: se initialData sumir (ex: ao sair de edição)
-  useEffect(() => {
-    const path = location.pathname;
-    const isNew = path.endsWith("/new");
-
-    // 🧱 Bloqueia atualização se vier com dados "fantasma"
-    if (isNew && initialData && Object.keys(initialData).length > 0) {
-      console.error("Ignoring stale initialData during 'new' route:", initialData);
-      return; // não sobrescreve o estado limpo
-    }
-
-    if (isNew) {
-      setForm({
-        username: "",
-        email: "",
-        password: "",
-        enabled: true,
-        roles: [],
-      });
-    } else if (initialData) {
-      setForm({
-        username: initialData.username ?? "",
-        email: initialData.email ?? "",
-        password: "",
-        enabled: initialData.enabled ?? true,
-        roles: initialData.roles ?? [],
-      });
-    }
-  }, [location.pathname, initialData]);
-
+  // 🧩 Manipuladores de formulário
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -107,7 +79,10 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     setErrors({});
 
     try {
-      await createUser(form);
+      // 🔒 Clonar para evitar mutação
+      const payload = { ...form };
+      await createUser(payload);
+
       notifications.show("Usuário criado com sucesso!", { severity: "success" });
       if (onSubmitSuccess) onSubmitSuccess();
       else navigate("/users");
@@ -127,7 +102,9 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
 
   return (
     <Box
+      id="create-user-form"
       component="form"
+      autoComplete="off" // 🚫 Bloqueia autofill global do navegador
       onSubmit={handleSubmit}
       sx={{
         display: "grid",
@@ -144,6 +121,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         error={!!errors.username}
         helperText={errors.username}
         fullWidth
+        autoComplete="new-username" // 🚫 Bloqueia autofill individual
       />
 
       <TextField
@@ -155,6 +133,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         error={!!errors.email}
         helperText={errors.email}
         fullWidth
+        autoComplete="new-email"
       />
 
       <TextField
@@ -166,6 +145,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         error={!!errors.password}
         helperText={errors.password}
         fullWidth
+        autoComplete="new-password"
       />
 
       <FormControlLabel
