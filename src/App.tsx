@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useParams } from "react-router-dom";
 
 import DashboardPage from "@/components/dashboard/DashboardPage";
 import AppLayout from "@/components/layout/AppLayout";
@@ -22,6 +22,12 @@ import { NotificationsProvider } from "@/hooks/useNotifications/NotificationsPro
 
 import LoginPage from "@/pages/LoginPage";
 
+// 🔹 Wrapper para garantir key dinâmica por ID na edição de usuários
+function UserEditWrapper() {
+  const { id } = useParams();
+  return <UserEdit key={`user-edit-${id}`} />;
+}
+
 export default function App() {
   return (
     <ColorModeProvider>
@@ -29,10 +35,10 @@ export default function App() {
         <NotificationsProvider>
           <AuthProvider>
             <Routes>
-              {/* 🔓 Rota pública de login */}
+              {/* 🔐 Login público */}
               <Route path="/login" element={<LoginPage />} />
 
-              {/* 🔒 Rotas protegidas com layout principal */}
+              {/* 🔐 Rotas protegidas */}
               <Route
                 path="/*"
                 element={
@@ -41,28 +47,28 @@ export default function App() {
                   </ProtectedRoute>
                 }
               >
-                {/* Página inicial (dashboard) */}
+                {/* 📊 Página inicial (dashboard) */}
                 <Route index element={<DashboardPage />} />
 
-                {/* Employees CRUD */}
-                <Route path="employees">
+                {/* 👥 Funcionários (CRUD completo) */}
+                <Route path="employees" element={<Outlet />}>
                   <Route index element={<EmployeeList />} />
                   <Route path="new" element={<EmployeeCreate />} />
                   <Route path=":id" element={<EmployeeShow />} />
                   <Route path=":id/edit" element={<EmployeeEdit />} />
                 </Route>
 
-                {/* Users CRUD */}
-                <Route path="users">
+                {/* 👤 Usuários (com isolamento entre criar/editar) */}
+                <Route path="users" element={<Outlet />}>
                   <Route index element={<UserList />} />
-                  <Route path="new" element={<UserCreate />} />
+                  <Route path="new" element={<UserCreate key="user-create" />} />
                   <Route path=":id" element={<UserShow />} />
-                  <Route path=":id/edit" element={<UserEdit />} />
+                  <Route path=":id/edit" element={<UserEditWrapper />} />
                 </Route>
-              </Route>
 
-              {/* Redireciona rotas desconhecidas */}
-              <Route path="*" element={<Navigate to="/" replace />} />
+                {/* 🚦 Redirecionamento padrão */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
             </Routes>
           </AuthProvider>
         </NotificationsProvider>
