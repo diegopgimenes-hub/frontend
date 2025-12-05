@@ -2,7 +2,7 @@ import { createUser } from "@/api/userApi";
 import { useNotifications } from "@/hooks/useNotifications/NotificationsContext";
 import { Box, Button, FormControlLabel, Switch, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export interface UserFormData {
   username: string;
@@ -18,6 +18,10 @@ interface UserFormProps {
 }
 
 export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const notifications = useNotifications();
+
   const [form, setForm] = useState<UserFormData>({
     username: "",
     email: "",
@@ -29,30 +33,15 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const notifications = useNotifications();
-  const navigate = useNavigate();
-
-  // 🔁 Reinicializa completamente o formulário ao montar ou quando mudar initialData
+  // 🧠 Reset proativo baseado na URL e nos dados
   useEffect(() => {
-    // ⚠️ Detecta modo "edição" apenas se houver dados reais
-    const hasData =
-      initialData &&
-      (initialData.username ||
-        initialData.email ||
-        initialData.password ||
-        (initialData.roles && initialData.roles.length > 0));
+    const path = location.pathname;
+    const isNew = path.endsWith("/new");
 
-    if (hasData) {
-      // Edição → preenche com dados existentes
-      setForm({
-        username: initialData.username ?? "",
-        email: initialData.email ?? "",
-        password: "",
-        enabled: initialData.enabled ?? true,
-        roles: initialData.roles ?? [],
-      });
-    } else {
-      // Criação → tudo limpo, apenas ativo=true
+    console.error("UserForm effect triggered for:", location.pathname, "isNew:", isNew);
+
+    if (isNew) {
+      // 🔹 Criação → sempre limpa
       setForm({
         username: "",
         email: "",
@@ -60,8 +49,47 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         enabled: true,
         roles: [],
       });
+    } else if (initialData && Object.keys(initialData).length > 0) {
+      // 🔹 Edição → popula
+      setForm({
+        username: initialData.username ?? "",
+        email: initialData.email ?? "",
+        password: "",
+        enabled: initialData.enabled ?? true,
+        roles: initialData.roles ?? [],
+      });
     }
-  }, [initialData]);
+  }, [location.pathname, initialData]);
+
+  // 🔥 Reset extra: se initialData sumir (ex: ao sair de edição)
+  useEffect(() => {
+    const path = location.pathname;
+    const isNew = path.endsWith("/new");
+
+    // 🧱 Bloqueia atualização se vier com dados "fantasma"
+    if (isNew && initialData && Object.keys(initialData).length > 0) {
+      console.error("Ignoring stale initialData during 'new' route:", initialData);
+      return; // não sobrescreve o estado limpo
+    }
+
+    if (isNew) {
+      setForm({
+        username: "",
+        email: "",
+        password: "",
+        enabled: true,
+        roles: [],
+      });
+    } else if (initialData) {
+      setForm({
+        username: initialData.username ?? "",
+        email: initialData.email ?? "",
+        password: "",
+        enabled: initialData.enabled ?? true,
+        roles: initialData.roles ?? [],
+      });
+    }
+  }, [location.pathname, initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -94,6 +122,8 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
       setIsSubmitting(false);
     }
   };
+
+  console.error("Rendering form with data:", form);
 
   return (
     <Box

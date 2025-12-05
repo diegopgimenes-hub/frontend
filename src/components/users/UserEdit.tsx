@@ -12,7 +12,6 @@ export default function UserEdit() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // 🔁 Sempre recarrega quando o ID muda
   useEffect(() => {
     if (!id) return;
 
@@ -34,6 +33,7 @@ export default function UserEdit() {
 
   return (
     <PageContainer
+      key={`user-edit-${id}`} // 🔑 força remount ao mudar de usuário
       title="Editar Usuário"
       icon={<EditIcon />}
       breadcrumbs={[{ title: "Usuários", path: "/users" }, { title: "Editar" }]}
@@ -46,15 +46,13 @@ export default function UserEdit() {
         ) : error ? (
           <Alert severity="error">{error.message}</Alert>
         ) : user ? (
-          // ✅ key força remontagem quando ID muda
           <UserForm
-            key={user.id}
             initialData={{
               username: user.username,
               email: user.email,
               enabled: user.enabled,
               roles: user.roles,
-              password: "", // sempre vazio por segurança
+              password: "",
             }}
           />
         ) : (
