@@ -11,7 +11,7 @@ export default function UserCreate() {
       breadcrumbs={[{ title: "Usuários", path: "/users" }, { title: "Novo" }]}
     >
       <Box sx={{ maxWidth: 600, mx: "auto", mt: 2 }}>
-        <UserForm /> {/* ✅ sem initialData */}
+        <UserForm key="create" />
       </Box>
     </PageContainer>
   );

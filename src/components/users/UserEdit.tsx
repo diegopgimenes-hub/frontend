@@ -12,13 +12,14 @@ export default function UserEdit() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // 🔁 Sempre recarrega quando o ID muda
   useEffect(() => {
     if (!id) return;
 
     const fetchUser = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        setIsLoading(true);
-        setError(null);
         const data = await getUserById(Number(id));
         setUser(data);
       } catch (err) {
@@ -45,6 +46,7 @@ export default function UserEdit() {
         ) : error ? (
           <Alert severity="error">{error.message}</Alert>
         ) : user ? (
+          // ✅ key força remontagem quando ID muda
           <UserForm
             key={user.id}
             initialData={{
@@ -52,7 +54,7 @@ export default function UserEdit() {
               email: user.email,
               enabled: user.enabled,
               roles: user.roles,
-              password: "", // senha sempre vazia para edição
+              password: "", // sempre vazio por segurança
             }}
           />
         ) : (

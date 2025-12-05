@@ -1,10 +1,9 @@
 import { createUser } from "@/api/userApi";
 import { useNotifications } from "@/hooks/useNotifications/NotificationsContext";
 import { Box, Button, FormControlLabel, Switch, TextField } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Interface de dados específicos para o formulário
 export interface UserFormData {
   username: string;
   email: string;
@@ -13,7 +12,6 @@ export interface UserFormData {
   roles: string[];
 }
 
-// ✅ Props aceitas pelo formulário
 interface UserFormProps {
   initialData?: Partial<UserFormData>;
   onSubmitSuccess?: () => void;
@@ -21,11 +19,11 @@ interface UserFormProps {
 
 export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps) {
   const [form, setForm] = useState<UserFormData>({
-    username: initialData?.username ?? "",
-    email: initialData?.email ?? "",
-    password: initialData?.password ?? "",
-    enabled: initialData?.enabled ?? true, // ✅ apenas este começa true
-    roles: initialData?.roles ?? [],
+    username: "",
+    email: "",
+    password: "",
+    enabled: true,
+    roles: [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -34,19 +32,47 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
   const notifications = useNotifications();
   const navigate = useNavigate();
 
-  // 🔹 Atualiza campos de texto
+  // 🔁 Reinicializa completamente o formulário ao montar ou quando mudar initialData
+  useEffect(() => {
+    // ⚠️ Detecta modo "edição" apenas se houver dados reais
+    const hasData =
+      initialData &&
+      (initialData.username ||
+        initialData.email ||
+        initialData.password ||
+        (initialData.roles && initialData.roles.length > 0));
+
+    if (hasData) {
+      // Edição → preenche com dados existentes
+      setForm({
+        username: initialData.username ?? "",
+        email: initialData.email ?? "",
+        password: "",
+        enabled: initialData.enabled ?? true,
+        roles: initialData.roles ?? [],
+      });
+    } else {
+      // Criação → tudo limpo, apenas ativo=true
+      setForm({
+        username: "",
+        email: "",
+        password: "",
+        enabled: true,
+        roles: [],
+      });
+    }
+  }, [initialData]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
-  // 🔹 Atualiza o switch de “Ativo”
   const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm(prev => ({ ...prev, enabled: e.target.checked }));
   };
 
-  // 🔹 Envio do formulário
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -55,32 +81,19 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     try {
       await createUser(form);
       notifications.show("Usuário criado com sucesso!", { severity: "success" });
-
       if (onSubmitSuccess) onSubmitSuccess();
       else navigate("/users");
-    } catch (error: unknown) {
-      if (axiosError(error)) {
-        const status = error.response?.status;
-
-        if (status === 409 && typeof error.response?.data === "object") {
-          const { field, message } = error.response.data as { field?: string; message?: string };
-          if (field && message) setErrors({ [field]: message });
-        } else if (status === 400 && typeof error.response?.data === "string") {
-          notifications.show(error.response.data, { severity: "error" });
-        } else {
-          notifications.show("Erro ao criar usuário.", { severity: "error" });
-        }
+    } catch (error: any) {
+      if (error.response?.status === 409 && error.response?.data) {
+        const { field, message } = error.response.data;
+        if (field && message) setErrors({ [field]: message });
       } else {
-        notifications.show("Erro inesperado ao criar usuário.", { severity: "error" });
+        notifications.show("Erro ao criar usuário.", { severity: "error" });
       }
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // 🔸 Helper: garante tipo AxiosError
-  const axiosError = (error: unknown): error is import("axios").AxiosError =>
-    typeof error === "object" && !!error && "isAxiosError" in error;
 
   return (
     <Box
