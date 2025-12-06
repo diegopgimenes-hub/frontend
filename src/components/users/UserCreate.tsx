@@ -1,21 +1,38 @@
-import PageContainer from "@/components/common/PageContainer";
 import AddIcon from "@mui/icons-material/Add";
-import { Box } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import UserForm from "./UserForm";
 
-export default function UserCreate() {
-  // 🔹 Força a desmontagem completa do formulário ao acessar a rota
+interface UserCreateProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function UserCreate({ open, onClose }: UserCreateProps) {
+  const handleSuccess = () => {
+    // Você pode emitir um evento, chamar um callback, etc.
+    onClose();
+  };
+
   return (
-    <PageContainer
-      key={window.location.pathname} // força o React a recriar o componente ao trocar de rota
-      title="Novo Usuário"
-      icon={<AddIcon />}
-      breadcrumbs={[{ title: "Usuários", path: "/users" }, { title: "Novo" }]}
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      aria-labelledby="user-create-dialog"
     >
-      <Box sx={{ maxWidth: 600, mx: "auto", mt: 2 }}>
-        {/* 🔑 Formulário completamente isolado — sempre novo */}
-        <UserForm key="user-form-create" />
-      </Box>
-    </PageContainer>
+      <DialogTitle id="user-create-dialog">
+        <AddIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+        Novo Usuário
+      </DialogTitle>
+
+      <DialogContent dividers>
+        <UserForm key="user-form-create" onSuccess={handleSuccess} />
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onClose}>Cancelar</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

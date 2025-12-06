@@ -10,30 +10,28 @@ export default function UserEdit() {
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchUser = async () => {
-      setIsLoading(true);
-      setError(null);
+    const loadUser = async () => {
       try {
+        setIsLoading(true);
         const data = await getUserById(Number(id));
         setUser(data);
-      } catch (err) {
-        setError(err as Error);
+      } catch (err: any) {
+        setError(err?.message ?? "Erro ao carregar usuário.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUser();
+    loadUser();
   }, [id]);
 
   return (
     <PageContainer
-      key={`user-edit-${id}`} // 🔑 força remount ao mudar de usuário
       title="Editar Usuário"
       icon={<EditIcon />}
       breadcrumbs={[{ title: "Usuários", path: "/users" }, { title: "Editar" }]}
@@ -44,7 +42,7 @@ export default function UserEdit() {
             <CircularProgress />
           </Box>
         ) : error ? (
-          <Alert severity="error">{error.message}</Alert>
+          <Alert severity="error">{error}</Alert>
         ) : user ? (
           <UserForm
             initialData={{

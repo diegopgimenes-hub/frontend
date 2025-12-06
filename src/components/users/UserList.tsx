@@ -15,6 +15,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { DataGrid, GridActionsCellItem, GridColDef, gridClasses } from "@mui/x-data-grid";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import UserCreate from "./UserCreate"; // ✅ novo import
 
 const INITIAL_PAGE_SIZE = 10;
 
@@ -26,6 +27,7 @@ export default function UserList() {
   const [rows, setRows] = React.useState<User[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
+  const [openCreate, setOpenCreate] = React.useState(false); // ✅ controle do modal
 
   const loadUsers = React.useCallback(async () => {
     setError(null);
@@ -46,10 +48,6 @@ export default function UserList() {
   const handleRefresh = React.useCallback(() => {
     if (!isLoading) loadUsers();
   }, [isLoading, loadUsers]);
-
-  const handleCreateClick = React.useCallback(() => {
-    navigate("/users/new");
-  }, [navigate]);
 
   const handleRowEdit = React.useCallback(
     (user: User) => () => {
@@ -75,13 +73,10 @@ export default function UserList() {
           });
           loadUsers();
         } catch (deleteError) {
-          notifications.show(
-            `Erro ao excluir usuário: ${(deleteError as Error).message}`,
-            {
-              severity: "error",
-              autoHideDuration: 3000,
-            },
-          );
+          notifications.show(`Erro ao excluir usuário: ${(deleteError as Error).message}`, {
+            severity: "error",
+            autoHideDuration: 3000,
+          });
         }
         setIsLoading(false);
       }
@@ -98,14 +93,13 @@ export default function UserList() {
         field: "roles",
         headerName: "Perfis",
         flex: 1,
-        valueGetter: (_value, row) =>
-          Array.isArray(row.roles) ? row.roles.join(", ") : "",
+        valueGetter: (_value, row) => (Array.isArray(row.roles) ? row.roles.join(", ") : ""),
       },
       {
         field: "enabled",
         headerName: "Ativo",
         width: 120,
-        renderCell: (params) => (params.row.enabled ? "Sim" : "Não"),
+        renderCell: params => (params.row.enabled ? "Sim" : "Não"),
       },
       {
         field: "actions",
@@ -144,7 +138,11 @@ export default function UserList() {
               </IconButton>
             </div>
           </Tooltip>
-          <Button variant="contained" onClick={handleCreateClick} startIcon={<AddIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setOpenCreate(true)} // ✅ abre modal
+          >
             Novo
           </Button>
         </Stack>
@@ -170,15 +168,20 @@ export default function UserList() {
               [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
                 outline: "transparent",
               },
-              [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
-                { outline: "none" },
-              [`& .${gridClasses.row}:hover`]: {
-                cursor: "pointer",
-              },
+              [`& .${gridClasses.row}:hover`]: { cursor: "pointer" },
             }}
           />
         )}
       </Box>
+
+      {/* ✅ Modal de criação de usuário */}
+      <UserCreate
+        open={openCreate}
+        onClose={() => {
+          setOpenCreate(false);
+          loadUsers();
+        }}
+      />
     </PageContainer>
   );
 }

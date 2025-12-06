@@ -2,7 +2,7 @@ import { createUser } from "@/api/userApi";
 import { useNotifications } from "@/hooks/useNotifications/NotificationsContext";
 import { Box, Button, FormControlLabel, Switch, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export interface UserFormData {
   username: string;
@@ -18,7 +18,6 @@ interface UserFormProps {
 }
 
 export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps) {
-  const location = useLocation();
   const navigate = useNavigate();
   const notifications = useNotifications();
 
@@ -33,25 +32,9 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 🔍 Log de depuração
-  console.error(">>> PROPS RECEBIDAS:", { initialData });
-
-  // 🔁 Reset baseado em rota
+  // ✅ Preenche apenas se houver initialData (modo edição)
   useEffect(() => {
-    const path = location.pathname;
-    const isNew = path.endsWith("/new");
-
-    console.error("UserForm effect triggered for:", location.pathname, "isNew:", isNew);
-
-    if (isNew) {
-      setForm({
-        username: "",
-        email: "",
-        password: "",
-        enabled: true,
-        roles: [],
-      });
-    } else if (initialData && Object.keys(initialData).length > 0) {
+    if (initialData) {
       setForm({
         username: initialData.username ?? "",
         email: initialData.email ?? "",
@@ -60,9 +43,8 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         roles: initialData.roles ?? [],
       });
     }
-  }, [location.pathname, initialData]);
+  }, [initialData]);
 
-  // 🧩 Manipuladores de formulário
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -79,10 +61,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     setErrors({});
 
     try {
-      // 🔒 Clonar para evitar mutação
-      const payload = { ...form };
-      await createUser(payload);
-
+      await createUser({ ...form });
       notifications.show("Usuário criado com sucesso!", { severity: "success" });
       if (onSubmitSuccess) onSubmitSuccess();
       else navigate("/users");
@@ -98,13 +77,11 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     }
   };
 
-  console.error("Rendering form with data:", form);
-
   return (
     <Box
-      id="create-user-form"
       component="form"
-      autoComplete="off" // 🚫 Bloqueia autofill global do navegador
+      id="create-user-form"
+      autoComplete="off" // 🚫 bloqueia autofill global
       onSubmit={handleSubmit}
       sx={{
         display: "grid",
@@ -121,7 +98,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         error={!!errors.username}
         helperText={errors.username}
         fullWidth
-        autoComplete="new-username" // 🚫 Bloqueia autofill individual
+        autoComplete="new-username"
       />
 
       <TextField

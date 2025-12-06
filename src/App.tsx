@@ -22,7 +22,7 @@ import { NotificationsProvider } from "@/hooks/useNotifications/NotificationsPro
 
 import LoginPage from "@/pages/LoginPage";
 
-// 🔹 Wrapper para garantir key dinâmica por ID na edição de usuários
+// 🔹 Wrapper para edição com chave única
 function UserEditWrapper() {
   const { id } = useParams();
   return <UserEdit key={`user-edit-${id}`} />;
@@ -35,10 +35,10 @@ export default function App() {
         <NotificationsProvider>
           <AuthProvider>
             <Routes>
-              {/* 🔐 Login público */}
+              {/* 🔐 Rota pública de login */}
               <Route path="/login" element={<LoginPage />} />
 
-              {/* 🔐 Rotas protegidas */}
+              {/* 🔒 Rotas protegidas */}
               <Route
                 path="/*"
                 element={
@@ -47,10 +47,10 @@ export default function App() {
                   </ProtectedRoute>
                 }
               >
-                {/* 📊 Página inicial (dashboard) */}
+                {/* 🏠 Dashboard */}
                 <Route index element={<DashboardPage />} />
 
-                {/* 👥 Funcionários (CRUD completo) */}
+                {/* 👥 Funcionários */}
                 <Route path="employees" element={<Outlet />}>
                   <Route index element={<EmployeeList />} />
                   <Route path="new" element={<EmployeeCreate />} />
@@ -58,15 +58,15 @@ export default function App() {
                   <Route path=":id/edit" element={<EmployeeEdit />} />
                 </Route>
 
-                {/* 👤 Usuários (com isolamento entre criar/editar) */}
+                {/* 👤 Usuários */}
                 <Route path="users" element={<Outlet />}>
                   <Route index element={<UserList />} />
-                  <Route path="new" element={<UserCreate key="user-create" />} />
+                  <Route path="new" element={<UserCreate />} />
                   <Route path=":id" element={<UserShow />} />
                   <Route path=":id/edit" element={<UserEditWrapper />} />
                 </Route>
 
-                {/* 🚦 Redirecionamento padrão */}
+                {/* 🚦 Rota padrão */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
