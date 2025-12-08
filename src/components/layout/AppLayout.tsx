@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import * as React from "react";
+import React from "react";
 import { Outlet } from "react-router-dom";
 
 import SitemarkIcon from "@/components/common/SitemarkIcon";
@@ -23,34 +23,33 @@ export default function AppLayout() {
     ? isDesktopNavigationExpanded
     : isMobileNavigationExpanded;
 
-  const setIsNavigationExpanded = React.useCallback(
-    (newExpanded: boolean) => {
+  const setNavigationExpanded = React.useCallback<React.Dispatch<React.SetStateAction<boolean>>>(
+    value => {
       if (isOverMdViewport) {
-        setIsDesktopNavigationExpanded(newExpanded);
+        setIsDesktopNavigationExpanded(value);
       } else {
-        setIsMobileNavigationExpanded(newExpanded);
+        setIsMobileNavigationExpanded(value);
       }
     },
-    [isOverMdViewport],
+    [isOverMdViewport], // ✅ só recria quando muda o breakpoint
   );
 
-  // ✅ Sincroniza com localStorage ao iniciar
+  // 🔹 Restaurar estado do Drawer salvo
   React.useEffect(() => {
     const stored = localStorage.getItem(DRAWER_EXPANDED_KEY);
     if (stored !== null) {
-      setIsDesktopNavigationExpanded(stored === "true");
+      setNavigationExpanded(stored === "true");
     }
-  }, []);
+  }, [setNavigationExpanded]);
 
-  // ✅ Persiste sempre que mudar
+  // 🔹 Salvar estado do Drawer
   React.useEffect(() => {
-    localStorage.setItem(DRAWER_EXPANDED_KEY, String(isDesktopNavigationExpanded));
-  }, [isDesktopNavigationExpanded]);
+    localStorage.setItem(DRAWER_EXPANDED_KEY, String(isNavigationExpanded));
+  }, [isNavigationExpanded]);
 
-  // ✅ Toggle via AppBar
   const handleToggleHeaderMenu = React.useCallback(() => {
-    setIsNavigationExpanded(!isNavigationExpanded);
-  }, [isNavigationExpanded, setIsNavigationExpanded]);
+    setNavigationExpanded(prev => !prev);
+  }, [setNavigationExpanded]);
 
   const layoutRef = React.useRef<HTMLDivElement>(null);
 
@@ -71,11 +70,13 @@ export default function AppLayout() {
         menuOpen={isNavigationExpanded}
         onToggleMenu={handleToggleHeaderMenu}
       />
+
       <Drawer
         expanded={isNavigationExpanded}
-        setExpanded={setIsNavigationExpanded}
+        setExpanded={setNavigationExpanded} // ✅ Corrigido
         container={layoutRef?.current ?? undefined}
       />
+
       <Box
         sx={{
           display: "flex",
