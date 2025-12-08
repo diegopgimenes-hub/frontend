@@ -13,7 +13,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,json,md}\"",
     "typecheck": "tsc --noEmit --pretty",
     "check": "npm run lint && npm run typecheck",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "eslintConfig": {
     "root": true,
@@ -48,9 +48,11 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "prettier": "^3.7.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2",
+    "typescript": "^5.9.3",
     "vite": "^6.0.1"
   }
 }

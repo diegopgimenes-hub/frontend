@@ -1,22 +1,30 @@
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
+    /* 🧠 Compilação moderna e compatível com Vite */
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "jsx": "react-jsx",
+
+    /* 🧩 ESSENCIAL — corrige o erro de '@typescript-eslint/utils/ts-eslint' */
     "moduleResolution": "bundler",
-    "allowJs": false,
+
+    /* ✅ Compatibilidade e segurança */
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+
+    /* ⚙️ Organização e imports absolutos */
     "baseUrl": "src",
     "paths": {
       "@/*": ["*"]
     }
   },
-  "include": ["src", "src/main.tsx"],
+
+  /* 🔍 Define exatamente o que será analisado */
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
