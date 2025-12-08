@@ -142,17 +142,6 @@ export default function Drawer({
                 </ListItemIcon>
                 <ListItemText primary="Users" />
               </ListItemButton>
-
-              <ListItemButton
-                sx={{ pl: 4 }}
-                selected={menuActive("/employees")}
-                onClick={handleNavigate("/employees")}
-              >
-                <ListItemIcon>
-                  <PeopleIcon />
-                </ListItemIcon>
-                <ListItemText primary="Employees" />
-              </ListItemButton>
             </List>
           </Collapse>
         </List>

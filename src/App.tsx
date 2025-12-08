@@ -3,11 +3,6 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import DashboardPage from "@/components/dashboard/DashboardPage";
 import AppLayout from "@/components/layout/AppLayout";
 
-import EmployeeCreate from "@/components/employees/EmployeeCreate";
-import EmployeeEdit from "@/components/employees/EmployeeEdit";
-import EmployeeList from "@/components/employees/EmployeeList";
-import EmployeeShow from "@/components/employees/EmployeeShow";
-
 import UserList from "@/components/users/UserList";
 
 import ProtectedRoute from "@/components/routes/ProtectedRoute";
@@ -40,14 +35,6 @@ export default function App() {
               >
                 {/* 🏠 Dashboard */}
                 <Route index element={<DashboardPage />} />
-
-                {/* 👥 Funcionários */}
-                <Route path="employees" element={<Outlet />}>
-                  <Route index element={<EmployeeList />} />
-                  <Route path="new" element={<EmployeeCreate />} />
-                  <Route path=":id" element={<EmployeeShow />} />
-                  <Route path=":id/edit" element={<EmployeeEdit />} />
-                </Route>
 
                 {/* 👤 Usuários */}
                 <Route path="users" element={<Outlet />}>
