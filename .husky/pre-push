@@ -1,5 +1,10 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+echo "🧠 Rodando checagem de tipos TypeScript antes do push..."
 
-echo "🧠 Rodando checagem TypeScript antes do push..."
 npx tsc --noEmit
+
+if [ $? -ne 0 ]; then
+  echo "❌ Erros de tipagem detectados. Corrija antes de fazer push."
+  exit 1
+fi
+
+echo "✅ Nenhum erro de tipo encontrado. Prosseguindo com o push..."
