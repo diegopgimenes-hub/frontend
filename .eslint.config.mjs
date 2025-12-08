@@ -8,34 +8,40 @@ import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 
 /**
- * ESLint Flat Config — configuração completa do projeto
- * Analisa todos os arquivos TS/TSX/JS/JSX sob src/
- * Ignora build, node_modules e configs.
+ * ESLint moderno e otimizado para React + TypeScript + Vite + Prettier
+ * Baseado no ESLint Flat Config (ESLint 8.56+)
  */
 export default [
   js.configs.recommended,
-  prettier,
+  prettier, // ✅ desativa regras conflitantes com Prettier
+
   {
     files: ["src/**/*.{ts,tsx,js,jsx}"],
-    ignores: ["node_modules/", "dist/", "build/", "coverage/", "vite.config.ts", "tsconfig*.json"],
+    ignores: ["node_modules/", "dist/", "build/", "coverage/", "vite.config.ts", "tsconfig.*.json"],
+
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./tsconfig.json",
-        ecmaVersion: "latest",
-        sourceType: "module",
         ecmaFeatures: { jsx: true },
       },
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+      },
     },
+
     plugins: {
       "@typescript-eslint": tseslint,
       react,
       "react-hooks": reactHooks,
     },
+
     settings: {
-      react: { version: "detect" },
+      react: {
+        version: "detect",
+      },
     },
+
     rules: {
       // React
       "react/react-in-jsx-scope": "off",
@@ -46,7 +52,7 @@ export default [
       // TypeScript
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "off",
 
