@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes, useParams } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import DashboardPage from "@/components/dashboard/DashboardPage";
 import AppLayout from "@/components/layout/AppLayout";
@@ -8,10 +8,7 @@ import EmployeeEdit from "@/components/employees/EmployeeEdit";
 import EmployeeList from "@/components/employees/EmployeeList";
 import EmployeeShow from "@/components/employees/EmployeeShow";
 
-import UserCreate from "@/components/users/UserCreate";
-import UserEdit from "@/components/users/UserEdit";
 import UserList from "@/components/users/UserList";
-import UserShow from "@/components/users/UserShow";
 
 import ProtectedRoute from "@/components/routes/ProtectedRoute";
 import { AuthProvider } from "@/context/AuthContext";
@@ -21,12 +18,6 @@ import { DialogsProvider } from "@/hooks/useDialogs/DialogsProvider";
 import { NotificationsProvider } from "@/hooks/useNotifications/NotificationsProvider";
 
 import LoginPage from "@/pages/LoginPage";
-
-// 🔹 Wrapper para edição com chave única
-function UserEditWrapper() {
-  const { id } = useParams();
-  return <UserEdit key={`user-edit-${id}`} />;
-}
 
 export default function App() {
   return (
@@ -61,9 +52,6 @@ export default function App() {
                 {/* 👤 Usuários */}
                 <Route path="users" element={<Outlet />}>
                   <Route index element={<UserList />} />
-                  <Route path="new" element={<UserCreate />} />
-                  <Route path=":id" element={<UserShow />} />
-                  <Route path=":id/edit" element={<UserEditWrapper />} />
                 </Route>
 
                 {/* 🚦 Rota padrão */}

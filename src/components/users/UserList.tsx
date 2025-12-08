@@ -14,20 +14,24 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import { DataGrid, GridActionsCellItem, GridColDef, gridClasses } from "@mui/x-data-grid";
 import * as React from "react";
-import { useNavigate } from "react-router-dom";
-import UserCreate from "./UserCreate"; // ✅ novo import
+import UserCreate from "./UserCreate";
+import UserEdit from "./UserEdit";
+import UserShow from "./UserShow";
 
 const INITIAL_PAGE_SIZE = 10;
 
 export default function UserList() {
-  const navigate = useNavigate();
   const dialogs = useDialogs();
   const notifications = useNotifications();
 
   const [rows, setRows] = React.useState<User[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<Error | null>(null);
-  const [openCreate, setOpenCreate] = React.useState(false); // ✅ controle do modal
+
+  const [openCreate, setOpenCreate] = React.useState(false);
+  const [openEdit, setOpenEdit] = React.useState(false);
+  const [openShow, setOpenShow] = React.useState(false);
+  const [selectedUserId, setSelectedUserId] = React.useState<number | null>(null);
 
   const loadUsers = React.useCallback(async () => {
     setError(null);
@@ -49,11 +53,17 @@ export default function UserList() {
     if (!isLoading) loadUsers();
   }, [isLoading, loadUsers]);
 
+  const handleRowClick = React.useCallback((params: any) => {
+    setSelectedUserId(params.row.id);
+    setOpenShow(true);
+  }, []);
+
   const handleRowEdit = React.useCallback(
     (user: User) => () => {
-      navigate(`/users/${user.id}/edit`);
+      setSelectedUserId(user.id);
+      setOpenEdit(true);
     },
-    [navigate],
+    [],
   );
 
   const handleRowDelete = React.useCallback(
@@ -138,11 +148,7 @@ export default function UserList() {
               </IconButton>
             </div>
           </Tooltip>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenCreate(true)} // ✅ abre modal
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenCreate(true)}>
             Novo
           </Button>
         </Stack>
@@ -158,11 +164,11 @@ export default function UserList() {
             rows={rows}
             columns={columns}
             disableRowSelectionOnClick
+            onRowClick={handleRowClick}
             loading={isLoading}
             initialState={{
               pagination: { paginationModel: { pageSize: INITIAL_PAGE_SIZE } },
             }}
-            showToolbar
             pageSizeOptions={[5, INITIAL_PAGE_SIZE, 25]}
             sx={{
               [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
@@ -174,12 +180,28 @@ export default function UserList() {
         )}
       </Box>
 
-      {/* ✅ Modal de criação de usuário */}
+      {/* ✅ Modais */}
       <UserCreate
         open={openCreate}
         onClose={() => {
           setOpenCreate(false);
           loadUsers();
+        }}
+      />
+      <UserEdit
+        open={openEdit}
+        userId={selectedUserId}
+        onClose={() => {
+          setOpenEdit(false);
+          loadUsers();
+        }}
+      />
+      <UserShow
+        open={openShow}
+        userId={selectedUserId}
+        onClose={() => {
+          setOpenShow(false);
+          setSelectedUserId(null);
         }}
       />
     </PageContainer>

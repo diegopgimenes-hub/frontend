@@ -1,8 +1,7 @@
-import { createUser } from "@/api/userApi";
+import { createUser, getUserById, updateUser } from "@/api/userApi";
 import { useNotifications } from "@/hooks/useNotifications/NotificationsContext";
 import { Box, Button, FormControlLabel, Switch, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export interface UserFormData {
   username: string;
@@ -13,12 +12,11 @@ export interface UserFormData {
 }
 
 interface UserFormProps {
-  initialData?: Partial<UserFormData>;
-  onSubmitSuccess?: () => void;
+  userId?: number;
+  onSuccess?: () => void;
 }
 
-export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps) {
-  const navigate = useNavigate();
+export default function UserForm({ userId, onSuccess }: UserFormProps) {
   const notifications = useNotifications();
 
   const [form, setForm] = useState<UserFormData>({
@@ -32,18 +30,24 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ Preenche apenas se houver initialData (modo edição)
+  // 🟢 Se tiver userId, estamos editando → carrega dados
   useEffect(() => {
-    if (initialData) {
-      setForm({
-        username: initialData.username ?? "",
-        email: initialData.email ?? "",
-        password: "",
-        enabled: initialData.enabled ?? true,
-        roles: initialData.roles ?? [],
-      });
+    if (userId) {
+      getUserById(userId)
+        .then(data => {
+          setForm({
+            username: data.username ?? "",
+            email: data.email ?? "",
+            password: "",
+            enabled: data.enabled ?? true,
+            roles: data.roles ?? [],
+          });
+        })
+        .catch(() => {
+          notifications.show("Erro ao carregar usuário.", { severity: "error" });
+        });
     }
-  }, [initialData]);
+  }, [userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,16 +65,20 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
     setErrors({});
 
     try {
-      await createUser({ ...form });
-      notifications.show("Usuário criado com sucesso!", { severity: "success" });
-      if (onSubmitSuccess) onSubmitSuccess();
-      else navigate("/users");
+      if (userId) {
+        await updateUser(userId, form);
+        notifications.show("Usuário atualizado com sucesso!", { severity: "success" });
+      } else {
+        await createUser(form);
+        notifications.show("Usuário criado com sucesso!", { severity: "success" });
+      }
+      onSuccess?.(); // 🟢 chama callback após sucesso
     } catch (error: any) {
       if (error.response?.status === 409 && error.response?.data) {
         const { field, message } = error.response.data;
         if (field && message) setErrors({ [field]: message });
       } else {
-        notifications.show("Erro ao criar usuário.", { severity: "error" });
+        notifications.show("Erro ao salvar usuário.", { severity: "error" });
       }
     } finally {
       setIsSubmitting(false);
@@ -80,15 +88,9 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
   return (
     <Box
       component="form"
-      id="create-user-form"
-      autoComplete="off" // 🚫 bloqueia autofill global
+      id="user-form"
       onSubmit={handleSubmit}
-      sx={{
-        display: "grid",
-        gap: 2,
-        maxWidth: 400,
-        margin: "0 auto",
-      }}
+      sx={{ display: "grid", gap: 2, maxWidth: 400, margin: "0 auto" }}
     >
       <TextField
         name="username"
@@ -98,7 +100,7 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         error={!!errors.username}
         helperText={errors.username}
         fullWidth
-        autoComplete="new-username"
+        autoComplete="username"
       />
 
       <TextField
@@ -110,20 +112,22 @@ export default function UserForm({ initialData, onSubmitSuccess }: UserFormProps
         error={!!errors.email}
         helperText={errors.email}
         fullWidth
-        autoComplete="new-email"
+        autoComplete="email"
       />
 
-      <TextField
-        name="password"
-        label="Senha"
-        type="password"
-        value={form.password}
-        onChange={handleChange}
-        error={!!errors.password}
-        helperText={errors.password}
-        fullWidth
-        autoComplete="new-password"
-      />
+      {!userId && (
+        <TextField
+          name="password"
+          label="Senha"
+          type="password"
+          value={form.password}
+          onChange={handleChange}
+          error={!!errors.password}
+          helperText={errors.password}
+          fullWidth
+          autoComplete="new-password"
+        />
+      )}
 
       <FormControlLabel
         control={<Switch checked={form.enabled} onChange={handleSwitchChange} name="enabled" />}
