@@ -1,26 +1,29 @@
 import api from "@/api/axiosInstance";
+import { RomaneioDTO, RomaneioSimpleDTO } from "@/types/romaneio";
 import {
+  Alert,
   Box,
+  Button,
   Card,
-  CardContent,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  Grid,
   IconButton,
-  List,
-  ListItemButton,
-  ListItemText,
+  InputLabel,
+  MenuItem,
+  Select,
+  Snackbar,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
 import { Search } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
-// DTO mínimo — /api/drivers/selection
 interface DriverSelectDTO {
   id: number;
   nome: string;
@@ -28,219 +31,297 @@ interface DriverSelectDTO {
   celular: string;
 }
 
-// DTO completo — /api/drivers/{id}
 interface DriverDTO {
   codigoId: number;
   nomeMot: string;
   cpfMot: string;
-  rgMot?: string;
-  estadoMot?: string;
-  dataNasc?: string;
-  cnhMot?: string;
-  catCnh?: string;
-  vencCnh?: string;
-  endMot?: string;
-  cidAtual?: string;
-  ufAtual?: string;
-  telRes?: string;
-  emailMot?: string;
-  placaVeic?: string;
-  tipoVeic?: string;
-  propNom?: string;
-  propCpf?: string;
-  status?: string;
+  rgMot: string;
+  cnhMot: string;
+  catCnh: string;
+  vencCnh: string;
+  endMot: string;
+  bairroMot: string;
+  cidAtual: string;
+  ufAtual: string;
+  cepMot: string;
+  telRes: string;
+  emailMot: string;
+  placaVeic: string;
+  modeloVei: string;
+  corVeic: string;
+  tipoVeic: string;
+  antt: string;
+  status: string;
+  [key: string]: any;
 }
 
 const DriverBoard: React.FC = () => {
-  const [tab, setTab] = useState(0);
+  const [tabValue, setTabValue] = useState(0);
+  const [selectedDriver, setSelectedDriver] = useState<DriverSelectDTO | null>(null);
+  const [driverDetails, setDriverDetails] = useState<DriverDTO | null>(null);
+  const [driverList, setDriverList] = useState<DriverSelectDTO[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+
+  const [romaneios, setRomaneios] = useState<RomaneioSimpleDTO[]>([]);
+  const [selectedRomaneioId, setSelectedRomaneioId] = useState<number | null>(null);
+  const [romaneioDetails, setRomaneioDetails] = useState<RomaneioDTO | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState<DriverDTO | null>(null);
 
-  // Modal de seleção
-  const [modalOpen, setModalOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<DriverSelectDTO[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info" as "success" | "error" | "warning" | "info",
+  });
 
-  // 🔍 Busca motoristas no modal
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      setResults([]);
-      return;
+  const showMessage = (
+    message: string,
+    severity: "success" | "error" | "warning" | "info" = "info",
+  ) => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  // 🔍 Buscar motoristas por texto
+  const handleSearchDrivers = async () => {
+    try {
+      const res = await api.get<DriverSelectDTO[]>(`/api/drivers/selection?q=${searchQuery}`);
+      setDriverList(res.data);
+    } catch (err) {
+      showMessage("Erro ao buscar motoristas.", "error");
+      console.error(err);
     }
+  };
 
-    const timeout = setTimeout(async () => {
-      try {
-        setSearching(true);
-        const response = await api.get<DriverSelectDTO[]>("/api/drivers/selection", {
-          params: { q: query },
-        });
-        setResults(response.data ?? []);
-      } catch (err) {
-        console.error("Erro ao buscar motoristas:", err);
-        setResults([]);
-      } finally {
-        setSearching(false);
-      }
-    }, 400);
-
-    return () => clearTimeout(timeout);
-  }, [query]);
-
-  // 🧭 Seleciona motorista
-  const handleSelect = async (driver: DriverSelectDTO) => {
+  // ✅ Selecionar motorista → carrega detalhes e romaneios
+  const handleSelectDriver = async (driver: DriverSelectDTO) => {
     try {
       setLoading(true);
-      const response = await api.get<DriverDTO>(`/api/drivers/${driver.id}`);
-      setSelectedDriver(response.data);
-      setModalOpen(false);
+      setSelectedDriver(driver);
+      setOpenModal(false);
+
+      // Carregar dados completos do motorista
+      const driverRes = await api.get<DriverDTO>(`/api/drivers/${driver.id}`);
+      setDriverDetails(driverRes.data);
+
+      // Carregar romaneios do motorista
+      const romaneiosRes = await api.get<RomaneioSimpleDTO[]>(
+        `/api/romaneios/driver/${driverRes.data.codMot || driverRes.data.codigoId}/last`,
+      );
+      setRomaneios(romaneiosRes.data);
+      setRomaneioDetails(null);
+      setSelectedRomaneioId(null);
+
+      showMessage(`Motorista ${driver.nome} carregado com sucesso.`, "success");
     } catch (err) {
-      console.error("Erro ao carregar dados do motorista:", err);
-      setSelectedDriver(null);
+      console.error(err);
+      showMessage("Erro ao carregar dados do motorista.", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Box p={3}>
-      {/* Cabeçalho com título e lupa */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-        <Typography variant="h5">
-          Quadro do Motorista{" "}
-          <Typography component="span" variant="subtitle1" color="text.secondary">
-            {selectedDriver
-              ? `(${selectedDriver.nomeMot} — CPF: ${selectedDriver.cpfMot})`
-              : "(Nenhum motorista selecionado)"}
-          </Typography>
-        </Typography>
+  const handleChangeTab = (_: any, newValue: number) => setTabValue(newValue);
 
-        <IconButton onClick={() => setModalOpen(true)} color="primary" title="Selecionar motorista">
-          <Search size={20} />
+  return (
+    <Box sx={{ p: 3 }}>
+      {/* Cabeçalho */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h5" fontWeight="bold">
+          Quadro do Motorista{" "}
+          {selectedDriver ? (
+            <Typography component="span" color="text.secondary" fontSize="1rem">
+              ({selectedDriver.nome} — CPF: {selectedDriver.cpf} — Cel: {selectedDriver.celular})
+            </Typography>
+          ) : (
+            <Typography component="span" color="text.secondary" fontSize="1rem">
+              (Nenhum motorista selecionado)
+            </Typography>
+          )}
+        </Typography>
+        <IconButton color="primary" onClick={() => setOpenModal(true)}>
+          <Search />
         </IconButton>
       </Box>
 
       {/* Tabs */}
-      <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)} sx={{ mb: 2 }}>
+      <Tabs value={tabValue} onChange={handleChangeTab} sx={{ mt: 2 }}>
         <Tab label="Dados do Motorista" />
         <Tab label="Romaneios do Motorista" />
         <Tab label="Notas Fiscais" />
       </Tabs>
 
-      {/* Aba: Dados do Motorista */}
-      {tab === 0 && (
-        <Card variant="outlined">
-          <CardContent>
-            {loading ? (
-              <Box display="flex" justifyContent="center" p={3}>
-                <CircularProgress />
-              </Box>
-            ) : selectedDriver ? (
-              <Grid2 container spacing={2}>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">Nome:</Typography>
-                  <Typography>{selectedDriver.nomeMot}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">CPF:</Typography>
-                  <Typography>{selectedDriver.cpfMot}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">RG:</Typography>
-                  <Typography>{selectedDriver.rgMot || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">CNH:</Typography>
-                  <Typography>{selectedDriver.cnhMot || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">Categoria:</Typography>
-                  <Typography>{selectedDriver.catCnh || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">Validade CNH:</Typography>
-                  <Typography>{selectedDriver.vencCnh || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12 }}>
-                  <Typography variant="subtitle2">Endereço:</Typography>
-                  <Typography>{selectedDriver.endMot || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">Cidade Atual:</Typography>
-                  <Typography>{selectedDriver.cidAtual || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">UF:</Typography>
-                  <Typography>{selectedDriver.ufAtual || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">Telefone:</Typography>
-                  <Typography>{selectedDriver.telRes || "-"}</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2">E-mail:</Typography>
-                  <Typography>{selectedDriver.emailMot || "-"}</Typography>
-                </Grid2>
-              </Grid2>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                Selecione um motorista clicando na lupa acima.
-              </Typography>
-            )}
-          </CardContent>
-        </Card>
+      {/* === Aba: Dados do Motorista === */}
+      {tabValue === 0 && (
+        <Box sx={{ mt: 3 }}>
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : !driverDetails ? (
+            <Typography color="text.secondary">
+              Selecione um motorista para visualizar os dados.
+            </Typography>
+          ) : (
+            <Card sx={{ p: 2, borderRadius: 2, boxShadow: 2 }}>
+              <Grid container spacing={2}>
+                {Object.entries(driverDetails).map(([key, value]) => (
+                  <Grid item xs={12} sm={6} md={4} key={key}>
+                    <Typography variant="body2">
+                      <strong>{key}:</strong> {value ?? "—"}
+                    </Typography>
+                  </Grid>
+                ))}
+              </Grid>
+            </Card>
+          )}
+        </Box>
       )}
 
-      {/* Aba: Romaneios */}
-      {tab === 1 && (
-        <Typography variant="body2" color="text.secondary">
-          (Em breve) Aqui serão listados os romaneios do motorista.
-        </Typography>
+      {/* === Aba: Romaneios do Motorista === */}
+      {tabValue === 1 && (
+        <Box sx={{ mt: 2 }}>
+          {!selectedDriver ? (
+            <Typography variant="body1" color="text.secondary">
+              Selecione um motorista para visualizar seus romaneios.
+            </Typography>
+          ) : (
+            <>
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="romaneio-select-label">Selecionar Romaneio</InputLabel>
+                <Select
+                  labelId="romaneio-select-label"
+                  value={selectedRomaneioId || ""}
+                  label="Selecionar Romaneio"
+                  onChange={async (e) => {
+                    const id = e.target.value as number;
+                    setSelectedRomaneioId(id);
+                    try {
+                      const response = await api.get<RomaneioDTO>(`/api/romaneios/${id}`);
+                      setRomaneioDetails(response.data);
+                    } catch (err) {
+                      console.error("Erro ao buscar romaneio:", err);
+                      showMessage("Erro ao buscar detalhes do romaneio.", "error");
+                    }
+                  }}
+                >
+                  {romaneios.length > 0 ? (
+                    romaneios.map((r) => (
+                      <MenuItem key={r.id} value={r.id}>
+                        {`Romaneio #${r.id} — ${r.dataEmbarque ?? "Sem data"} ${
+                          r.horaEmbarque ?? ""
+                        }`}
+                      </MenuItem>
+                    ))
+                  ) : (
+                    <MenuItem disabled>Nenhum romaneio encontrado</MenuItem>
+                  )}
+                </Select>
+              </FormControl>
+
+              {romaneioDetails && (
+                <Card sx={{ mt: 3, p: 2, borderRadius: 2, boxShadow: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Detalhes do Romaneio #{romaneioDetails.codigoId}
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body2">
+                        <strong>Status:</strong> {romaneioDetails.status ?? "—"}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Motorista:</strong> {romaneioDetails.motNome ?? "—"}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Cliente:</strong> {romaneioDetails.cliente ?? "—"}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="body2">
+                        <strong>Placa:</strong> {romaneioDetails.placaM1 ?? "—"}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Peso Total:</strong>{" "}
+                        {romaneioDetails.totPeso ? `${romaneioDetails.totPeso} kg` : "—"}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Valor Frete:</strong>{" "}
+                        {romaneioDetails.vlFrete ? `R$ ${romaneioDetails.vlFrete.toFixed(2)}` : "—"}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Card>
+              )}
+            </>
+          )}
+        </Box>
       )}
 
-      {/* Aba: Notas Fiscais */}
-      {tab === 2 && (
-        <Typography variant="body2" color="text.secondary">
-          (Em breve) Aqui serão listadas as notas fiscais do motorista.
-        </Typography>
-      )}
-
-      {/* Modal de seleção de motorista */}
-      <Dialog open={modalOpen} onClose={() => setModalOpen(false)} fullWidth maxWidth="sm">
+      {/* === Modal de seleção de motoristas === */}
+      <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
         <DialogTitle>Selecionar Motorista</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            margin="dense"
-            label="Buscar motorista"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            InputProps={{
-              endAdornment: searching ? <CircularProgress size={20} /> : null,
-            }}
-          />
-          <List>
-            {results.map((driver) => (
-              <ListItemButton key={driver.id} onClick={() => handleSelect(driver)}>
-                <ListItemText
-                  primary={driver.nome}
-                  secondary={`CPF: ${driver.cpf} — Cel: ${driver.celular}`}
-                />
-              </ListItemButton>
-            ))}
-            {!searching && results.length === 0 && query.length >= 2 && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mt: 2, textAlign: "center" }}
+          <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+            <input
+              type="text"
+              placeholder="Buscar motorista..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                flex: 1,
+                padding: "8px",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+              }}
+            />
+            <Button onClick={handleSearchDrivers} variant="contained">
+              Buscar
+            </Button>
+          </Box>
+          {driverList.length === 0 ? (
+            <Typography color="text.secondary">Nenhum motorista encontrado.</Typography>
+          ) : (
+            driverList.map((d) => (
+              <Card
+                key={d.id}
+                sx={{
+                  mb: 1,
+                  p: 1.5,
+                  borderRadius: 2,
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#f5f5f5" },
+                }}
+                onClick={() => handleSelectDriver(d)}
               >
-                Nenhum motorista encontrado.
-              </Typography>
-            )}
-          </List>
+                <Typography fontWeight="bold">{d.nome}</Typography>
+                <Typography variant="body2">CPF: {d.cpf}</Typography>
+                <Typography variant="body2">Celular: {d.celular}</Typography>
+              </Card>
+            ))
+          )}
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModal(false)}>Fechar</Button>
+        </DialogActions>
       </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
