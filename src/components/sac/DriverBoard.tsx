@@ -2,123 +2,108 @@ import api from "@/api/axiosInstance";
 import {
   Autocomplete,
   Box,
+  Card,
+  CardContent,
   CircularProgress,
-  Paper,
   Tab,
   Tabs,
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import Grid2 from "@mui/material/Grid2";
+import React, { useEffect, useState } from "react";
 
-// === Tipos ===
-interface Driver {
+// DTOs
+interface DriverSelectDTO {
   id: number;
   nome: string;
-  cpf?: string;
-  celular?: string;
+  cpf: string;
+  celular: string;
 }
 
-// === COMPONENTE PRINCIPAL ===
-export default function DriverBoard() {
-  const [tabIndex, setTabIndex] = useState(0);
-
-  return (
-    <Box sx={{ p: 3 }}>
-      {/* Título */}
-      <Typography variant="h5" fontWeight={600} mb={2}>
-        Quadro do Motorista
-      </Typography>
-
-      {/* Tabs */}
-      <Paper elevation={2} sx={{ borderRadius: 2 }}>
-        <Tabs
-          value={tabIndex}
-          onChange={(_, newValue) => setTabIndex(newValue)}
-          indicatorColor="primary"
-          textColor="primary"
-          variant="fullWidth"
-        >
-          <Tab label="Dados do Motorista" />
-          <Tab label="Romaneios do Motorista" />
-          <Tab label="Notas Fiscais" />
-        </Tabs>
-
-        {/* Conteúdo da aba */}
-        <Box sx={{ p: 3 }}>
-          {tabIndex === 0 && <DriverData />}
-          {tabIndex === 1 && <DriverShipments />}
-          {tabIndex === 2 && <DriverInvoices />}
-        </Box>
-      </Paper>
-    </Box>
-  );
+interface DriverDTO extends DriverSelectDTO {
+  cnh?: string;
+  categoria?: string;
+  validadeCnh?: string;
+  endereco?: string;
+  cidade?: string;
+  estado?: string;
+  placaVeiculo?: string;
+  tipoVeiculo?: string;
+  observacoes?: string;
 }
 
-// === TABS INTERNAS ===
-
-function DriverData() {
-  const [query, setQuery] = useState("");
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+// ====================== COMPONENTE PRINCIPAL ======================
+const DriverBoard: React.FC = () => {
+  const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [options, setOptions] = useState<DriverSelectDTO[]>([]);
+  const [selectedDriver, setSelectedDriver] = useState<DriverDTO | null>(null);
 
+  // --- busca opções para o autocomplete ---
   useEffect(() => {
-    if (query.length < 2) {
-      setDrivers([]);
+    if (query.trim().length < 2) {
+      setOptions([]);
       return;
     }
 
-    const delayDebounce = setTimeout(async () => {
+    const timeout = setTimeout(async () => {
       try {
         setLoading(true);
-        const response = await api.get<Driver[]>("/api/drivers/selection", {
+        const response = await api.get<DriverSelectDTO[]>("/api/drivers/selection", {
           params: { q: query },
         });
-        setDrivers(response.data);
+        setOptions(response.data ?? []);
       } catch (err) {
         console.error("Erro ao buscar motoristas:", err);
+        setOptions([]);
       } finally {
         setLoading(false);
       }
-    }, 400); // debounce de 400ms
+    }, 400);
 
-    return () => clearTimeout(delayDebounce);
+    return () => clearTimeout(timeout);
   }, [query]);
 
+  // --- quando um motorista é selecionado ---
+  const handleSelect = async (driver: DriverSelectDTO | null) => {
+    if (!driver) {
+      setSelectedDriver(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.get<DriverDTO>(`/api/drivers/${driver.id}`);
+      setSelectedDriver(response.data);
+    } catch (err) {
+      console.error("Erro ao carregar dados do motorista:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- renderização ---
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Dados do Motorista
+    <Box p={3}>
+      <Typography variant="h5" gutterBottom>
+        Quadro do Motorista
       </Typography>
 
-      {/* Campo de seleção de motorista */}
+      {/* Campo de seleção */}
       <Autocomplete
-        options={drivers}
-        getOptionLabel={(option) => (option?.nome ? `${option.nome} (${option.cpf})` : "")}
-        renderOption={(props, option) => (
-          <li {...props} key={option.id}>
-            <Box display="flex" flexDirection="column">
-              <Typography variant="subtitle2" fontWeight={600}>
-                {option.nome}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                CPF: {option.cpf} • Celular: {option.celular}
-              </Typography>
-            </Box>
-          </li>
-        )}
-        value={selectedDriver}
+        fullWidth
+        options={options}
+        getOptionLabel={(option) => `${option.nome} — CPF: ${option.cpf} — Cel: ${option.celular}`}
         loading={loading}
         onInputChange={(_, value) => setQuery(value)}
-        onChange={(_, value) => setSelectedDriver(value)}
+        onChange={(_, value) => handleSelect(value)}
         renderInput={(params) => (
           <TextField
             {...params}
             label="Selecione o motorista"
-            placeholder="Digite nome ou CPF"
             variant="outlined"
-            fullWidth
             InputProps={{
               ...params.InputProps,
               endAdornment: (
@@ -130,48 +115,93 @@ function DriverData() {
             }}
           />
         )}
-        sx={{ maxWidth: 400, mb: 3 }}
+        sx={{ mb: 3, mt: 1 }}
       />
 
-      {/* Exibe dados do motorista selecionado */}
-      {selectedDriver && (
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600}>
-            {selectedDriver.nome}
-          </Typography>
-          {selectedDriver.cpf && (
-            <Typography variant="body2" color="text.secondary">
-              CPF: {selectedDriver.cpf}
-            </Typography>
-          )}
-        </Paper>
+      {/* Tabs */}
+      <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)} sx={{ mb: 2 }}>
+        <Tab label="Dados do Motorista" />
+        <Tab label="Romaneios do Motorista" />
+        <Tab label="Notas Fiscais" />
+      </Tabs>
+
+      {/* Conteúdo das abas */}
+      {tab === 0 && (
+        <Card variant="outlined">
+          <CardContent>
+            {selectedDriver ? (
+              <Grid2 container spacing={2}>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Nome:</Typography>
+                  <Typography>{selectedDriver.nome}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">CPF:</Typography>
+                  <Typography>{selectedDriver.cpf}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Celular:</Typography>
+                  <Typography>{selectedDriver.celular}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">CNH:</Typography>
+                  <Typography>{selectedDriver.cnh || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Categoria:</Typography>
+                  <Typography>{selectedDriver.categoria || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Validade CNH:</Typography>
+                  <Typography>{selectedDriver.validadeCnh || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12 }}>
+                  <Typography variant="subtitle2">Endereço:</Typography>
+                  <Typography>{selectedDriver.endereco || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Cidade:</Typography>
+                  <Typography>{selectedDriver.cidade || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Estado:</Typography>
+                  <Typography>{selectedDriver.estado || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Placa do Veículo:</Typography>
+                  <Typography>{selectedDriver.placaVeiculo || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 6 }}>
+                  <Typography variant="subtitle2">Tipo de Veículo:</Typography>
+                  <Typography>{selectedDriver.tipoVeiculo || "-"}</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12 }}>
+                  <Typography variant="subtitle2">Observações:</Typography>
+                  <Typography>{selectedDriver.observacoes || "-"}</Typography>
+                </Grid2>
+              </Grid2>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                Selecione um motorista para visualizar os dados.
+              </Typography>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === 1 && (
+        <Typography variant="body2" color="text.secondary">
+          (Em breve) Aqui serão listados os romaneios do motorista.
+        </Typography>
+      )}
+
+      {tab === 2 && (
+        <Typography variant="body2" color="text.secondary">
+          (Em breve) Aqui serão listadas as notas fiscais do motorista.
+        </Typography>
       )}
     </Box>
   );
-}
+};
 
-function DriverShipments() {
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Romaneios do Motorista
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Aqui você poderá visualizar os romaneios associados ao motorista selecionado.
-      </Typography>
-    </Box>
-  );
-}
-
-function DriverInvoices() {
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Notas Fiscais
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Aqui serão listadas as notas fiscais vinculadas ao motorista.
-      </Typography>
-    </Box>
-  );
-}
+export default DriverBoard;
