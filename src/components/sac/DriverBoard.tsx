@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 // === Tipos ===
 interface Driver {
   id: number;
-  name: string;
+  nome: string;
   cpf?: string;
   celular?: string;
 }
@@ -95,7 +95,19 @@ function DriverData() {
       {/* Campo de seleção de motorista */}
       <Autocomplete
         options={drivers}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) => (option?.nome ? `${option.nome} (${option.cpf})` : "")}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            <Box display="flex" flexDirection="column">
+              <Typography variant="subtitle2" fontWeight={600}>
+                {option.nome}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                CPF: {option.cpf} • Celular: {option.celular}
+              </Typography>
+            </Box>
+          </li>
+        )}
         value={selectedDriver}
         loading={loading}
         onInputChange={(_, value) => setQuery(value)}
@@ -104,7 +116,7 @@ function DriverData() {
           <TextField
             {...params}
             label="Selecione o motorista"
-            placeholder="Digite o nome ou CPF"
+            placeholder="Digite nome ou CPF"
             variant="outlined"
             fullWidth
             InputProps={{
@@ -125,7 +137,7 @@ function DriverData() {
       {selectedDriver && (
         <Paper sx={{ p: 2 }}>
           <Typography variant="subtitle1" fontWeight={600}>
-            {selectedDriver.name}
+            {selectedDriver.nome}
           </Typography>
           {selectedDriver.cpf && (
             <Typography variant="body2" color="text.secondary">
