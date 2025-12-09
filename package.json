@@ -17,7 +17,7 @@
   },
   "eslintConfig": {
     "root": true,
-    "extends": "./.eslint.config.mjs"
+    "extends": "./eslint.config.mjs"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
