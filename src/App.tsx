@@ -36,8 +36,8 @@ export default function App() {
               >
                 <Route index element={<HomePage />} />
 
-                <Route path="/users" element={<UserList />} />
-                <Route path="/roles" element={<RoleList />} />
+                <Route path="users" element={<UserList />} />
+                <Route path="roles" element={<RoleList />} />
 
                 {/* 🚦 Rota padrão */}
                 <Route path="*" element={<Navigate to="/" replace />} />

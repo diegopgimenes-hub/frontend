@@ -1,4 +1,4 @@
-import { createUser, getUserById, updateUser } from "@/api/userApi";
+import { createUser, getUser, updateUser } from "@/api/userApi";
 import { useNotifications } from "@/hooks/useNotifications/NotificationsContext";
 import { Box, Button, FormControlLabel, Switch, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
@@ -33,8 +33,8 @@ export default function UserForm({ userId, onSuccess }: UserFormProps) {
   // 🟢 Se tiver userId, estamos editando → carrega dados
   useEffect(() => {
     if (userId) {
-      getUserById(userId)
-        .then(data => {
+      getUser(userId)
+        .then((data) => {
           setForm({
             username: data.username ?? "",
             email: data.email ?? "",
@@ -51,12 +51,12 @@ export default function UserForm({ userId, onSuccess }: UserFormProps) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: "" }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, enabled: e.target.checked }));
+    setForm((prev) => ({ ...prev, enabled: e.target.checked }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

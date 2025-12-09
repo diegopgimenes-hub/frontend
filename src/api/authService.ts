@@ -1,38 +1,70 @@
-import axios from "axios";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+// 📄 src/api/authService.ts
+import api from "./axiosInstance";
 
 export interface LoginRequest {
   username: string;
   password: string;
-  rememberMe: boolean;
 }
 
-export interface User {
+export interface AuthResponse {
+  token: string;
+  type?: string; // ex: "Bearer"
+  username?: string;
+  roles?: string[];
+}
+
+export interface CurrentUser {
   id: number;
   username: string;
   email: string;
   roles: string[];
+  enabled: boolean;
 }
 
-export async function login(req: LoginRequest): Promise<User> {
-  const { data } = await axios.post(`${API_BASE_URL}/auth/login`, req, {
-    withCredentials: true,
-  });
+// ====================== LOGIN ======================
+export async function login(credentials: LoginRequest): Promise<AuthResponse> {
+  const response = await api.post<AuthResponse>("/auth/login", credentials);
+  const data = response.data;
+
+  // 💾 salva o token no localStorage
+  if (data?.token) {
+    localStorage.setItem("token", data.token);
+  }
+
   return data;
 }
 
-export async function logout(): Promise<void> {
-  await axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true });
+// ====================== LOGOUT ======================
+export function logout(): void {
+  localStorage.removeItem("token");
+  // opcional: chame endpoint de logout do backend, se existir
+  // await api.post("/auth/logout");
 }
 
-export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const { data } = await axios.get(`${API_BASE_URL}/auth/me`, {
-      withCredentials: true,
-    });
-    return data;
-  } catch {
-    return null;
-  }
+// ====================== GET USER INFO ======================
+export async function getCurrentUser(): Promise<CurrentUser> {
+  const response = await api.get<CurrentUser>("/auth/me");
+  return response.data;
 }
+
+// ====================== TOKEN HANDLING ======================
+export function getToken(): string | null {
+  return localStorage.getItem("token");
+}
+
+// ====================== AXIOS INTERCEPTOR ======================
+// Aplica o token automaticamente em todas as requisições
+api.interceptors.request.use((config) => {
+  const token = getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default {
+  login,
+  logout,
+  getCurrentUser,
+  getToken,
+};

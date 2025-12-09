@@ -1,15 +1,6 @@
-import axios from "axios";
+// 📄 src/api/userApi.ts
+import api from "./axiosInstance";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-});
-
-// ==========
-// 📘 Tipos
-// ==========
 export interface User {
   id: number;
   username: string;
@@ -19,68 +10,36 @@ export interface User {
   roles: string[];
 }
 
-export interface CreateUserRequest {
+export interface UpsertUserRequest {
   username: string;
   email: string;
-  password: string;
-  enabled?: boolean;
-  roles?: string[];
-}
-
-export interface UpdateUserRequest {
-  username?: string;
-  email?: string;
   password?: string;
   enabled?: boolean;
   roles?: string[];
 }
 
-export interface Role {
-  id: number;
-  name: string;
-}
+const BASE_URL = "/admin/users";
 
-// ==========
-// ⚙️ Users API
-// ==========
 export async function getUsers(): Promise<User[]> {
-  const res = await api.get<User[]>("/admin/users");
-  return res.data;
+  const response = await api.get<User[]>(BASE_URL);
+  return response.data;
 }
 
-export async function getUserById(id: number): Promise<User> {
-  const res = await api.get<User>(`/admin/users/${id}`);
-  return res.data;
+export async function getUser(id: number): Promise<User> {
+  const response = await api.get<User>(`${BASE_URL}/${id}`);
+  return response.data;
 }
 
-export async function createUser(user: CreateUserRequest): Promise<User> {
-  // 🔒 Correção: clonar o objeto para evitar mutação do estado React
-  const payload = { ...user };
-  const res = await api.post<User>("/admin/users", payload);
-  return res.data;
+export async function createUser(payload: UpsertUserRequest): Promise<User> {
+  const response = await api.post<User>(BASE_URL, payload);
+  return response.data;
 }
 
-export async function updateUser(id: number, user: UpdateUserRequest): Promise<User> {
-  const payload = { ...user };
-  const res = await api.put<User>(`/admin/users/${id}`, payload);
-  return res.data;
+export async function updateUser(id: number, payload: UpsertUserRequest): Promise<User> {
+  const response = await api.put<User>(`${BASE_URL}/${id}`, payload);
+  return response.data;
 }
 
 export async function deleteUser(id: number): Promise<void> {
-  await api.delete(`/admin/users/${id}`);
+  await api.delete(`${BASE_URL}/${id}`);
 }
-
-export async function getRoles(): Promise<Role[]> {
-  const res = await api.get<Role[]>("/admin/roles");
-  return res.data;
-}
-
-// ==========
-export default {
-  getUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-  getRoles,
-};

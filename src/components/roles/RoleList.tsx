@@ -1,4 +1,7 @@
 import { deleteRole, getRoles } from "@/api/roleApi";
+import RoleCreate from "@/components/roles/RoleCreate";
+import RoleEdit from "@/components/roles/RoleEdit";
+import RoleShow from "@/components/roles/RoleShow";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -15,9 +18,6 @@ import {
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
-import RoleCreate from "./RoleCreate";
-import RoleEdit from "./RoleEdit";
-import RoleShow from "./RoleShow";
 
 export default function RoleList() {
   const [roles, setRoles] = useState<{ id: number; name: string }[]>([]);
@@ -29,9 +29,15 @@ export default function RoleList() {
   const loadRoles = async () => {
     try {
       const data = await getRoles();
-      setRoles(data);
+      console.log("📦 Retorno real de getRoles():", data);
+      const normalized = data.map((r) => ({
+        id: r.id,
+        name: r.name ?? "",
+      }));
+      setRoles(normalized);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao carregar roles:", err);
+      setRoles([]);
     }
   };
 
@@ -88,8 +94,9 @@ export default function RoleList() {
         <DataGrid
           rows={roles}
           columns={columns}
+          getRowId={(row) => row.id} // ✅ Garantia de ID único
           autoHeight
-          pageSizeOptions={[5, 10, 20]}
+          pageSizeOptions={[5, 10, 20, 100]}
           disableRowSelectionOnClick
         />
 

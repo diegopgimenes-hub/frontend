@@ -1,4 +1,4 @@
-import { getUserById, type User } from "@/api/userApi";
+import { getUser, type User } from "@/api/userApi";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Button,
@@ -22,7 +22,7 @@ export default function UserShow({ open, userId, onClose }: UserShowProps) {
 
   useEffect(() => {
     if (open && userId) {
-      getUserById(userId)
+      getUser(userId)
         .then(setUser)
         .catch(() => setUser(null));
     }

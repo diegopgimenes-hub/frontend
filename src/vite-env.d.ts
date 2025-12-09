@@ -1,6 +1,11 @@
 interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL: string;
-  // adicione outras variáveis conforme necessário
+  readonly DEV: boolean;
+  readonly PROD: boolean;
+  readonly MODE: string;
+
+  // Suporte para variáveis customizadas
+  readonly VITE_API_URL?: string;
+  readonly VITE_APP_NAME?: string;
 }
 
 interface ImportMeta {
