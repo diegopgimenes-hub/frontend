@@ -11,7 +11,7 @@ export default function RoleForm({ roleId, onSuccess }: RoleFormProps) {
   const [role, setRole] = useState<Partial<Role>>({ name: "" });
   const [loading, setLoading] = useState(false);
 
-  // Carrega role para edição
+  // Carrega a role ao editar
   useEffect(() => {
     if (roleId) {
       getRole(roleId)
@@ -22,16 +22,18 @@ export default function RoleForm({ roleId, onSuccess }: RoleFormProps) {
 
   const handleSubmit = async () => {
     if (!role.name?.trim()) return;
+    setLoading(true);
     try {
-      setLoading(true);
       if (roleId) {
         await updateRole(roleId, { name: role.name.trim() });
       } else {
         await createRole({ name: role.name.trim() });
       }
+
+      // ✅ Chama callback de sucesso (fecha modal e atualiza lista)
       onSuccess?.();
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao salvar role:", err);
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,7 @@ export default function RoleForm({ roleId, onSuccess }: RoleFormProps) {
         label="Nome da Role"
         name="name"
         value={role.name ?? ""}
-        onChange={(event) => setRole({ ...role, name: event.target.value })}
+        onChange={(e) => setRole({ ...role, name: e.target.value })}
         fullWidth
       />
 
