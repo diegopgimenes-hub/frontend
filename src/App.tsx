@@ -6,6 +6,8 @@ import AppLayout from "@/components/layout/AppLayout";
 import RoleList from "@/components/roles/RoleList";
 import UserList from "@/components/users/UserList";
 
+import DriverBoard from "@/components/sac/DriverBoard";
+
 import ProtectedRoute from "@/components/routes/ProtectedRoute";
 import { AuthProvider } from "@/context/AuthContext";
 import { ColorModeProvider } from "@/context/ColorModeContext";
@@ -35,10 +37,9 @@ export default function App() {
                 }
               >
                 <Route index element={<HomePage />} />
-
                 <Route path="users" element={<UserList />} />
                 <Route path="roles" element={<RoleList />} />
-
+                <Route path="sac/driver-board" element={<DriverBoard />} /> {/* ✅ relativo */}
                 {/* 🚦 Rota padrão */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>

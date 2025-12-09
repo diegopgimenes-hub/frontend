@@ -2,6 +2,7 @@ import { getDrawerWidthTransitionMixin } from "@/utils/mixins";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import HomeIcon from "@mui/icons-material/Home";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"; // 🚚 NOVO ícone
 import PeopleIcon from "@mui/icons-material/People";
 import SecurityIcon from "@mui/icons-material/Security";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -35,12 +36,11 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
   const navigate = useNavigate();
 
   const drawerWidth = expanded ? DRAWER_WIDTH : MIN_DRAWER_WIDTH;
-
-  const [openSystemConfig, setOpenSystemConfig] = React.useState(true);
+  const [openSystemConfig, setOpenSystemConfig] = React.useState(false);
+  const [openSAC, setOpenSAC] = React.useState(false);
 
   const handleToggle = () => setExpanded((prev) => !prev);
   const handleNavigate = (path: string) => () => navigate(path);
-
   const menuActive = (path: string) => pathname.startsWith(path);
 
   const getDrawerSx = (isTemporary: boolean) => ({
@@ -66,7 +66,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
         <List disablePadding dense>
-          {/* Home */}
+          {/* HOME */}
           <ListItemButton onClick={handleNavigate("/")} selected={menuActive("/")}>
             <ListItemIcon>
               <HomeIcon />
@@ -74,7 +74,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
             {expanded && <ListItemText primary="Home" />}
           </ListItemButton>
 
-          {/* Configurações de Sistema */}
+          {/* CONFIGURAÇÕES DE SISTEMA */}
           <ListItemButton onClick={() => setOpenSystemConfig(!openSystemConfig)}>
             <ListItemIcon>
               <SettingsIcon />
@@ -112,6 +112,31 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
               </ListItemButton>
             </List>
           </Collapse>
+
+          {/* SAC */}
+          <ListItemButton onClick={() => setOpenSAC(!openSAC)}>
+            <ListItemIcon>
+              <LocalShippingIcon />
+            </ListItemIcon>
+            {expanded && (
+              <ListItemText primary="SAC" primaryTypographyProps={{ fontWeight: "bold" }} />
+            )}
+          </ListItemButton>
+
+          <Collapse in={openSAC && expanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding dense>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={handleNavigate("/sac/driver-board")}
+                selected={menuActive("/sac/driver-board")}
+              >
+                <ListItemIcon>
+                  <LocalShippingIcon />
+                </ListItemIcon>
+                <ListItemText primary="Quadro do Motorista" />
+              </ListItemButton>
+            </List>
+          </Collapse>
         </List>
       </Box>
     </>
@@ -119,7 +144,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
 
   return (
     <>
-      {/* Drawer para mobile */}
+      {/* Drawer temporário (mobile) */}
       <MuiDrawer
         container={container}
         variant="temporary"
@@ -145,7 +170,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
       >
         {drawerContent}
 
-        {/* Botão para expandir/recolher */}
+        {/* Botão expandir/recolher */}
         <IconButton
           onClick={handleToggle}
           sx={{
@@ -154,9 +179,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
             right: expanded ? -12 : -18,
             backgroundColor: theme.palette.background.paper,
             boxShadow: 1,
-            "&:hover": {
-              backgroundColor: theme.palette.action.hover,
-            },
+            "&:hover": { backgroundColor: theme.palette.action.hover },
           }}
         >
           {expanded ? <ChevronLeftIcon /> : <ChevronRightIcon />}
