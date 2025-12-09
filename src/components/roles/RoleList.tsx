@@ -29,7 +29,6 @@ export default function RoleList() {
   const loadRoles = async () => {
     try {
       const data = await getRoles();
-      console.log("📦 Retorno real de getRoles():", data);
       const normalized = data.map((r) => ({
         id: r.id,
         name: r.name ?? "",

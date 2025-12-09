@@ -33,7 +33,7 @@
   "eslint.lintFilesOnStartup": true,
   "eslint.workingDirectories": [{ "mode": "auto" }],
   "eslint.options": {
-    "overrideConfigFile": ".eslint.config.mjs"
+    "overrideConfigFile": "eslint.config.mjs"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always",
