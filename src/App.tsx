@@ -1,8 +1,9 @@
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import DashboardPage from "@/components/dashboard/DashboardPage";
+import HomePage from "@/components/home/HomePage";
 import AppLayout from "@/components/layout/AppLayout";
 
+import RoleList from "@/components/roles/RoleList";
 import UserList from "@/components/users/UserList";
 
 import ProtectedRoute from "@/components/routes/ProtectedRoute";
@@ -33,13 +34,10 @@ export default function App() {
                   </ProtectedRoute>
                 }
               >
-                {/* 🏠 Dashboard */}
-                <Route index element={<DashboardPage />} />
+                <Route index element={<HomePage />} />
 
-                {/* 👤 Usuários */}
-                <Route path="users" element={<Outlet />}>
-                  <Route index element={<UserList />} />
-                </Route>
+                <Route path="/users" element={<UserList />} />
+                <Route path="/roles" element={<RoleList />} />
 
                 {/* 🚦 Rota padrão */}
                 <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,10 +1,13 @@
 import { getDrawerWidthTransitionMixin } from "@/utils/mixins";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import DashboardIcon from "@mui/icons-material/Dashboard";
+import HomeIcon from "@mui/icons-material/Home";
 import PeopleIcon from "@mui/icons-material/People";
+import SecurityIcon from "@mui/icons-material/Security";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Box,
+  Collapse,
   IconButton,
   List,
   ListItemButton,
@@ -31,25 +34,14 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  // 🔹 Define largura conforme o estado expandido
   const drawerWidth = expanded ? DRAWER_WIDTH : MIN_DRAWER_WIDTH;
 
-  // 🔹 Persiste estado expandido no localStorage
-  React.useEffect(() => {
-    localStorage.setItem("drawer-expanded", String(expanded));
-  }, [expanded]);
+  const [openSystemConfig, setOpenSystemConfig] = React.useState(true);
 
-  // 🔹 Recupera estado salvo ao iniciar
-  React.useEffect(() => {
-    const stored = localStorage.getItem("drawer-expanded");
-    if (stored !== null) {
-      setExpanded(stored === "true");
-    }
-  }, [setExpanded]);
-
-  // 🔹 Alterna entre expandido e recolhido
-  const handleToggle = () => setExpanded(prev => !prev);
+  const handleToggle = () => setExpanded((prev) => !prev);
   const handleNavigate = (path: string) => () => navigate(path);
+
+  const menuActive = (path: string) => pathname.startsWith(path);
 
   const getDrawerSx = (isTemporary: boolean) => ({
     displayPrint: "none",
@@ -69,26 +61,57 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
         }),
   });
 
-  const menuActive = (path: string) => pathname.startsWith(path);
-
   const drawerContent = (
     <>
       <Toolbar />
       <Box sx={{ overflow: "auto" }}>
         <List disablePadding dense>
+          {/* Home */}
           <ListItemButton onClick={handleNavigate("/")} selected={menuActive("/")}>
             <ListItemIcon>
-              <DashboardIcon />
+              <HomeIcon />
             </ListItemIcon>
-            {expanded && <ListItemText primary="Dashboard" />}
+            {expanded && <ListItemText primary="Home" />}
           </ListItemButton>
 
-          <ListItemButton onClick={handleNavigate("/users")} selected={menuActive("/users")}>
+          {/* Configurações de Sistema */}
+          <ListItemButton onClick={() => setOpenSystemConfig(!openSystemConfig)}>
             <ListItemIcon>
-              <PeopleIcon />
+              <SettingsIcon />
             </ListItemIcon>
-            {expanded && <ListItemText primary="Usuários" />}
+            {expanded && (
+              <ListItemText
+                primary="Configurações de Sistema"
+                primaryTypographyProps={{ fontWeight: "bold" }}
+              />
+            )}
           </ListItemButton>
+
+          <Collapse in={openSystemConfig && expanded} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding dense>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={handleNavigate("/users")}
+                selected={menuActive("/users")}
+              >
+                <ListItemIcon>
+                  <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Usuários" />
+              </ListItemButton>
+
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={handleNavigate("/roles")}
+                selected={menuActive("/roles")}
+              >
+                <ListItemIcon>
+                  <SecurityIcon />
+                </ListItemIcon>
+                <ListItemText primary="Roles" />
+              </ListItemButton>
+            </List>
+          </Collapse>
         </List>
       </Box>
     </>
@@ -96,7 +119,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
 
   return (
     <>
-      {/* 🔹 Drawer para mobile */}
+      {/* Drawer para mobile */}
       <MuiDrawer
         container={container}
         variant="temporary"
@@ -111,7 +134,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
         {drawerContent}
       </MuiDrawer>
 
-      {/* 🔹 Drawer fixo (desktop) */}
+      {/* Drawer fixo (desktop) */}
       <MuiDrawer
         variant="permanent"
         sx={{
@@ -122,7 +145,7 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
       >
         {drawerContent}
 
-        {/* 🔹 Botão para expandir/recolher */}
+        {/* Botão para expandir/recolher */}
         <IconButton
           onClick={handleToggle}
           sx={{
