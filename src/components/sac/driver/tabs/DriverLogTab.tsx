@@ -1,6 +1,5 @@
 import { DriverDTO } from "@/types/driver";
-import { formatDate } from "@/utils/format";
-import { Grid, Paper, TextField } from "@mui/material";
+import { Box, Paper, TextField } from "@mui/material";
 
 interface Props {
   driver: DriverDTO | null;
@@ -11,57 +10,73 @@ export default function DriverLogTab({ driver }: Props) {
 
   return (
     <Paper sx={{ p: 2, mt: 2 }}>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={3}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "repeat(12, 1fr)",
+          },
+          gap: 2,
+        }}
+      >
+        <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
           <TextField
-            label="Nível App"
-            value={driver.nivelApp || ""}
+            label="Cód. Usu. Inc"
+            value={driver.uCodInc || ""}
             fullWidth
             size="small"
             disabled
           />
-        </Grid>
-        <Grid item xs={12} md={3}>
+        </Box>
+        <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
           <TextField
-            label="Bloqueio App"
-            value={driver.bloqueioApp || ""}
+            label="Nome Usu. Inc"
+            value={driver.nCodInc || ""}
             fullWidth
             size="small"
             disabled
           />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <TextField
-            label="Bloqueio Administrativo"
-            value={driver.bloqueioA || ""}
-            fullWidth
-            size="small"
-            disabled
-          />
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={3}>
+        <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
           <TextField
-            label="Data Última Atualização"
-            value={formatDate(driver.datau)}
+            label="DT Inclusão"
+            value={driver.dtaInc || ""}
             fullWidth
             size="small"
             disabled
           />
-        </Grid>
-        <Grid item xs={12} md={3}>
+        </Box>
+        <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
           <TextField
-            label="Hora Última Atualização"
+            label="HR. Inclusão"
+            value={driver.hrInc || ""}
+            fullWidth
+            size="small"
+            disabled
+          />
+        </Box>
+
+        <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+          <TextField
+            label="DT Atualização"
+            value={driver.datau || ""}
+            fullWidth
+            size="small"
+            disabled
+          />
+        </Box>
+        <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+          <TextField
+            label="HR. Atualização"
             value={driver.horau || ""}
             fullWidth
             size="small"
             disabled
           />
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <TextField label="Status" value={driver.status || ""} fullWidth size="small" disabled />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Paper>
   );
 }
