@@ -1,8 +1,8 @@
 import api from "@/api/axiosInstance";
+import { SearchIcon } from "@/icons/index";
 import { DriverDTO, DriverSelectDTO } from "@/types/driver";
 import { RomaneioDTO, RomaneioSimpleDTO } from "@/types/romaneio";
 import { Alert, Box, IconButton, Snackbar, Tab, Tabs, Typography } from "@mui/material";
-import { Search } from "lucide-react";
 import React, { useState } from "react";
 import DriverDataTab from "./driver/DriverDataTab";
 import DriverSelectionDialog from "./driver/DriverSelectionDialog";
@@ -69,7 +69,7 @@ const DriverBoard: React.FC = () => {
         </Typography>
 
         <IconButton color="primary" onClick={() => setOpenDialog(true)}>
-          <Search />
+          <SearchIcon />
         </IconButton>
       </Box>
 
