@@ -1,5 +1,5 @@
 import { DriverDTO } from "@/types/driver";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Paper, Tab, Tabs, Typography } from "@mui/material";
 import React, { useState } from "react";
 import DriverBancariosTab from "./tabs/DriverBancariosTab";
 import DriverCadastraisTab from "./tabs/DriverCadastraisTab";
@@ -23,27 +23,29 @@ const DriverDataTab: React.FC<DriverDataTabProps> = ({ driver }) => {
   }
 
   return (
-    <Box>
-      <Tabs
-        value={tabIndex}
-        onChange={(_, newValue) => setTabIndex(newValue)}
-        textColor="primary"
-        indicatorColor="primary"
-        sx={{ mb: 2 }}
-      >
-        <Tab label="Cadastrais" />
-        <Tab label="Documentos" />
-        <Tab label="Contato" />
-        <Tab label="Bancários" />
-        <Tab label="Log" />
-      </Tabs>
+    <Paper sx={{ p: 2, mt: 2 }} elevation={3}>
+      <Box>
+        <Tabs
+          value={tabIndex}
+          onChange={(_, newValue) => setTabIndex(newValue)}
+          textColor="primary"
+          indicatorColor="primary"
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Cadastrais" />
+          <Tab label="Documentos" />
+          <Tab label="Contato" />
+          <Tab label="Bancários" />
+          <Tab label="Log" />
+        </Tabs>
 
-      {tabIndex === 0 && <DriverCadastraisTab driver={driver} />}
-      {tabIndex === 1 && <DriverDocumentosTab driver={driver} />}
-      {tabIndex === 2 && <DriverContatoTab driver={driver} />}
-      {tabIndex === 3 && <DriverBancariosTab driver={driver} />}
-      {tabIndex === 4 && <DriverLogTab driver={driver} />}
-    </Box>
+        {tabIndex === 0 && <DriverCadastraisTab driver={driver} />}
+        {tabIndex === 1 && <DriverDocumentosTab driver={driver} />}
+        {tabIndex === 2 && <DriverContatoTab driver={driver} />}
+        {tabIndex === 3 && <DriverBancariosTab driver={driver} />}
+        {tabIndex === 4 && <DriverLogTab driver={driver} />}
+      </Box>
+    </Paper>
   );
 };
 

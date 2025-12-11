@@ -1,8 +1,7 @@
-import { useColorMode } from "@/context/ColorModeContext"; // ✅ usa o contexto certo
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import IconButton from "@mui/material/IconButton";
+import { useColorMode } from "@/context/ColorModeContext";
 import Tooltip from "@mui/material/Tooltip";
+
+import { DarkModeIcon, IconButton, LightModeIcon } from "@/icons";
 
 export default function ThemeToggle() {
   const { mode, toggleColorMode } = useColorMode(); // ✅ hook do contexto
