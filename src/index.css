@@ -1,7 +1,10 @@
 /* src/index.css */
 
 /* Reset básico + herança de fonte */
-html,
+html {
+  scroll-behavior: smooth;
+}
+
 body,
 #root {
   margin: 0;
@@ -27,6 +30,8 @@ body,
 body {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  background-color: var(--mui-background-default);
 }
 
 /* Ajuste para o container raiz do MUI */

@@ -18,37 +18,29 @@ export default function AppLayout() {
   const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] = React.useState(false);
 
   const isOverMdViewport = useMediaQuery(theme.breakpoints.up("md"));
-
   const isNavigationExpanded = isOverMdViewport
     ? isDesktopNavigationExpanded
     : isMobileNavigationExpanded;
 
-  const setNavigationExpanded = React.useCallback<React.Dispatch<React.SetStateAction<boolean>>>(
-    value => {
-      if (isOverMdViewport) {
-        setIsDesktopNavigationExpanded(value);
-      } else {
-        setIsMobileNavigationExpanded(value);
-      }
+  const setNavigationExpanded = React.useCallback(
+    (value: boolean) => {
+      if (isOverMdViewport) setIsDesktopNavigationExpanded(value);
+      else setIsMobileNavigationExpanded(value);
     },
-    [isOverMdViewport], // ✅ só recria quando muda o breakpoint
+    [isOverMdViewport],
   );
 
-  // 🔹 Restaurar estado do Drawer salvo
   React.useEffect(() => {
     const stored = localStorage.getItem(DRAWER_EXPANDED_KEY);
-    if (stored !== null) {
-      setNavigationExpanded(stored === "true");
-    }
+    if (stored !== null) setNavigationExpanded(stored === "true");
   }, [setNavigationExpanded]);
 
-  // 🔹 Salvar estado do Drawer
   React.useEffect(() => {
     localStorage.setItem(DRAWER_EXPANDED_KEY, String(isNavigationExpanded));
   }, [isNavigationExpanded]);
 
   const handleToggleHeaderMenu = React.useCallback(() => {
-    setNavigationExpanded(prev => !prev);
+    setNavigationExpanded((prev) => !prev);
   }, [setNavigationExpanded]);
 
   const layoutRef = React.useRef<HTMLDivElement>(null);
@@ -57,11 +49,12 @@ export default function AppLayout() {
     <Box
       ref={layoutRef}
       sx={{
-        position: "relative",
         display: "flex",
-        overflow: "hidden",
-        height: "100%",
+        flexDirection: "row",
         width: "100%",
+        minHeight: "100vh",
+        overflow: "hidden", // drawer precisa disso
+        bgcolor: "background.default",
       }}
     >
       <AppBar
@@ -73,28 +66,36 @@ export default function AppLayout() {
 
       <Drawer
         expanded={isNavigationExpanded}
-        setExpanded={setNavigationExpanded} // ✅ Corrigido
+        setExpanded={setNavigationExpanded}
         container={layoutRef?.current ?? undefined}
       />
 
+      {/* 🔽 Container principal com scroll */}
       <Box
+        component="main"
         sx={{
+          flexGrow: 1,
           display: "flex",
           flexDirection: "column",
-          flex: 1,
-          minWidth: 0,
+          height: "100vh",
+          overflowY: "auto",
+          scrollbarWidth: "thin",
+          scrollbarColor: `${theme.palette.primary.main} transparent`,
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor:
+              theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+            borderRadius: "8px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: theme.palette.primary.main,
+          },
         }}
       >
-        <Toolbar sx={{ displayPrint: "none" }} />
-        <Box
-          component="main"
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            overflow: "auto",
-          }}
-        >
+        <Toolbar />
+        <Box sx={{ flex: 1, p: 3 }}>
           <Outlet />
         </Box>
       </Box>
