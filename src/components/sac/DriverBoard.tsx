@@ -14,7 +14,6 @@ const DriverBoard: React.FC = () => {
   const [selectedDriver, setSelectedDriver] = useState<DriverSelectDTO | null>(null);
   const [driverDetails, setDriverDetails] = useState<DriverDTO | null>(null);
   const [romaneios, setRomaneios] = useState<RomaneioSimpleDTO[]>([]);
-  const [romaneioDetails, setRomaneioDetails] = useState<RomaneioSimpleDTO | null>(null);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [_loading, setLoading] = useState(false);
@@ -84,12 +83,7 @@ const DriverBoard: React.FC = () => {
       {tabValue === 0 && <DriverDataTab driver={driverDetails} />}
 
       {tabValue === 1 && (
-        <DriverRomaneiosTab
-          selectedDriver={selectedDriver}
-          romaneios={romaneios}
-          romaneioDetails={romaneioDetails}
-          setRomaneioDetails={setRomaneioDetails}
-        />
+        <DriverRomaneiosTab selectedDriver={selectedDriver} romaneios={romaneios} />
       )}
 
       {/* Modal de seleção */}
