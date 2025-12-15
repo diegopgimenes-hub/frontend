@@ -48,7 +48,7 @@ const DriverSelectionDialog: React.FC<Props> = ({ open, onClose, onSelectDriver 
 
     try {
       setLoading(true);
-      const res = await api.get<DriverSelectDTO[]>(`/api/drivers/selection?q=${searchQuery}`);
+      const res = await api.get(`/api/drivers/selection?q=${encodeURIComponent(searchQuery)}`);
       setDriverList(res.data);
     } catch (error) {
       console.error("Erro ao buscar motoristas:", error);

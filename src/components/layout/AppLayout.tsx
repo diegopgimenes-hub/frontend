@@ -23,11 +23,16 @@ export default function AppLayout() {
     : isMobileNavigationExpanded;
 
   const setNavigationExpanded = React.useCallback(
-    (value: boolean) => {
-      if (isOverMdViewport) setIsDesktopNavigationExpanded(value);
-      else setIsMobileNavigationExpanded(value);
+    (value: React.SetStateAction<boolean>) => {
+      const nextValue =
+        typeof value === "function"
+          ? value(isOverMdViewport ? isDesktopNavigationExpanded : isMobileNavigationExpanded)
+          : value;
+
+      if (isOverMdViewport) setIsDesktopNavigationExpanded(nextValue);
+      else setIsMobileNavigationExpanded(nextValue);
     },
-    [isOverMdViewport],
+    [isOverMdViewport, isDesktopNavigationExpanded, isMobileNavigationExpanded],
   );
 
   React.useEffect(() => {

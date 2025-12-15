@@ -1,16 +1,13 @@
 /* src/index.css */
 
-/* Reset básico + herança de fonte */
-html {
-  scroll-behavior: smooth;
-}
-
+/* Reset global e fonte padrão */
+html,
 body,
 #root {
   margin: 0;
   padding: 0;
-  height: 100%;
   width: 100%;
+  min-height: 100vh;
   font-family:
     Roboto,
     -apple-system,
@@ -24,19 +21,39 @@ body,
     sans-serif;
   background-color: var(--mui-background-default, #fafafa);
   color: var(--mui-text-primary, #000);
+  scroll-behavior: smooth; /* ✅ rolagem suave */
 }
 
-/* Corrige comportamento de scroll e body flex */
+/* Garante que o body nunca bloqueie o scroll */
 body {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background-color: var(--mui-background-default);
+  overflow-y: auto; /* ✅ permite scroll global */
 }
 
-/* Ajuste para o container raiz do MUI */
+/* Container raiz do React/MUI */
 #root {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
   min-height: 100vh;
+}
+
+/* ✅ Scrollbar moderna e adaptada ao tema */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(33, 150, 243, 0.7); /* cor primária MUI */
 }
