@@ -1,7 +1,7 @@
 import api from "@/api/axiosInstance";
 import { SearchIcon } from "@/icons/index";
 import { DriverDTO, DriverSelectDTO } from "@/types/driver";
-import { RomaneioDTO, RomaneioSimpleDTO } from "@/types/romaneio";
+import { RomaneioSimpleDTO } from "@/types/romaneio";
 import { Alert, Box, IconButton, Snackbar, Tab, Tabs, Typography } from "@mui/material";
 import React, { useState } from "react";
 import DriverDataTab from "./driver/DriverDataTab";
@@ -14,7 +14,7 @@ const DriverBoard: React.FC = () => {
   const [selectedDriver, setSelectedDriver] = useState<DriverSelectDTO | null>(null);
   const [driverDetails, setDriverDetails] = useState<DriverDTO | null>(null);
   const [romaneios, setRomaneios] = useState<RomaneioSimpleDTO[]>([]);
-  const [romaneioDetails, setRomaneioDetails] = useState<RomaneioDTO | null>(null);
+  const [romaneioDetails, setRomaneioDetails] = useState<RomaneioSimpleDTO | null>(null);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [_loading, setLoading] = useState(false);

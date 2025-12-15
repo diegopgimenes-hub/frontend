@@ -1,8 +1,8 @@
 // src/types/romaneio.ts
 export interface RomaneioSimpleDTO {
-  id: number;
-  dataEmbarque: string | null;
-  horaEmbarque: string | null;
+  codigoId: number;
+  dtBipEmb: string | null;
+  hrBipEmb: string | null;
 }
 
 export interface RomaneioDTO {

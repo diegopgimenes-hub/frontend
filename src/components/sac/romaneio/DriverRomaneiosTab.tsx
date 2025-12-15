@@ -1,14 +1,14 @@
 import api from "@/api/axiosInstance";
 import { DriverSelectDTO } from "@/types/driver";
-import { RomaneioDTO, RomaneioSimpleDTO } from "@/types/romaneio";
+import { RomaneioSimpleDTO } from "@/types/romaneio";
 import { Box, Card, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import React from "react";
 
 interface Props {
   selectedDriver: DriverSelectDTO | null;
   romaneios: RomaneioSimpleDTO[];
-  romaneioDetails: RomaneioDTO | null;
-  setRomaneioDetails: (data: RomaneioDTO | null) => void;
+  romaneioDetails: RomaneioSimpleDTO | null;
+  setRomaneioDetails: (data: RomaneioSimpleDTO | null) => void;
 }
 
 const DriverRomaneiosTab: React.FC<Props> = ({
@@ -26,18 +26,18 @@ const DriverRomaneiosTab: React.FC<Props> = ({
         <InputLabel id="romaneio-select-label">Selecionar Romaneio</InputLabel>
         <Select
           labelId="romaneio-select-label"
-          value={romaneioDetails?.codigoId || ""}
+          value={romaneioDetails?.codigoId ?? ""}
           label="Selecionar Romaneio"
           onChange={async (e) => {
             const id = e.target.value as number;
-            const res = await api.get<RomaneioDTO>(`/api/romaneios/${id}`);
+            const res = await api.get<RomaneioSimpleDTO>(`/api/romaneios/${id}`);
             setRomaneioDetails(res.data);
           }}
         >
           {romaneios.length ? (
             romaneios.map((r) => (
-              <MenuItem key={r.id} value={r.id}>
-                Romaneio #{r.id} — {r.dataEmbarque} {r.horaEmbarque}
+              <MenuItem key={r.codigoId} value={r.codigoId}>
+                Romaneio #{r.codigoId} — {r.dtBipEmb ?? "sem data"} {r.hrBipEmb ?? ""}
               </MenuItem>
             ))
           ) : (
@@ -48,13 +48,9 @@ const DriverRomaneiosTab: React.FC<Props> = ({
 
       {romaneioDetails && (
         <Card sx={{ p: 2, mt: 2 }}>
-          <Typography variant="h6">
-            Romaneio #{romaneioDetails.codigoId} — {romaneioDetails.status}
-          </Typography>
-          <Typography>Cliente: {romaneioDetails.cliente}</Typography>
-          <Typography>Placa: {romaneioDetails.placaM1}</Typography>
-          <Typography>Peso Total: {romaneioDetails.totPeso ?? "—"}</Typography>
-          <Typography>Valor Frete: {romaneioDetails.vlFrete ?? "—"}</Typography>
+          <Typography variant="h6">Romaneio #{romaneioDetails.codigoId}</Typography>
+          <Typography>Data de Embarque: {romaneioDetails.dtBipEmb ?? "-"}</Typography>
+          <Typography>Hora de Embarque: {romaneioDetails.hrBipEmb ?? "-"}</Typography>
         </Card>
       )}
     </Box>
