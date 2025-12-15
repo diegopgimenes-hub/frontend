@@ -1,22 +1,46 @@
 import api from "@/api/axiosInstance";
 import { DriverSelectDTO } from "@/types/driver";
-import { RomaneioSimpleDTO } from "@/types/romaneio";
-import { Box, Card, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
-import React from "react";
+import { RomaneioDTO, RomaneioSimpleDTO } from "@/types/romaneio";
+import {
+  Box,
+  Card,
+  CircularProgress,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
 
 interface Props {
   selectedDriver: DriverSelectDTO | null;
   romaneios: RomaneioSimpleDTO[];
-  romaneioDetails: RomaneioSimpleDTO | null;
-  setRomaneioDetails: (data: RomaneioSimpleDTO | null) => void;
 }
 
-const DriverRomaneiosTab: React.FC<Props> = ({
-  selectedDriver,
-  romaneios,
-  romaneioDetails,
-  setRomaneioDetails,
-}) => {
+const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
+  const [romaneioDetails, setRomaneioDetails] = useState<RomaneioDTO | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSelectRomaneio = async (id: number | "") => {
+    if (!id) {
+      setRomaneioDetails(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await api.get<RomaneioDTO>(`/api/romaneios/${id}`);
+      setRomaneioDetails(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar romaneio:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!selectedDriver)
     return <Typography color="text.secondary">Selecione um motorista primeiro.</Typography>;
 
@@ -28,16 +52,12 @@ const DriverRomaneiosTab: React.FC<Props> = ({
           labelId="romaneio-select-label"
           value={romaneioDetails?.codigoId ?? ""}
           label="Selecionar Romaneio"
-          onChange={async (e) => {
-            const id = e.target.value as number;
-            const res = await api.get<RomaneioSimpleDTO>(`/api/romaneios/${id}`);
-            setRomaneioDetails(res.data);
-          }}
+          onChange={(e) => handleSelectRomaneio(e.target.value as number | "")}
         >
           {romaneios.length ? (
             romaneios.map((r) => (
-              <MenuItem key={r.codigoId ?? `null-${Math.random()}`} value={r.codigoId ?? ""}>
-                Romaneio #{r.codigoId ?? "?"} — {r.dtBipEmb ?? "sem data"} {r.hrBipEmb ?? ""}
+              <MenuItem key={r.codigoId} value={r.codigoId}>
+                Romaneio #{r.codigoId} — {r.dtBipEmb ?? "sem data"} {r.hrBipEmb ?? ""}
               </MenuItem>
             ))
           ) : (
@@ -46,11 +66,85 @@ const DriverRomaneiosTab: React.FC<Props> = ({
         </Select>
       </FormControl>
 
-      {romaneioDetails && (
-        <Card sx={{ p: 2, mt: 2 }}>
-          <Typography variant="h6">Romaneio #{romaneioDetails.codigoId}</Typography>
-          <Typography>Data de Embarque: {romaneioDetails.dtBipEmb ?? "-"}</Typography>
-          <Typography>Hora de Embarque: {romaneioDetails.hrBipEmb ?? "-"}</Typography>
+      {loading && (
+        <Box sx={{ textAlign: "center", mt: 3 }}>
+          <CircularProgress size={28} />
+        </Box>
+      )}
+
+      {!loading && romaneioDetails && (
+        <Card sx={{ p: 3, mt: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Detalhes do Romaneio #{romaneioDetails.codigoId}
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Motorista
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.motNome ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Placa
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.placaM1 ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Status
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.status ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Data de Embarque
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.dtBipEmb ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Hora de Embarque
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.hrBipEmb ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Peso Total
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.totPeso ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Valor do Frete
+              </Typography>
+              <Typography variant="subtitle1">
+                {romaneioDetails.vlFrete ? `R$ ${romaneioDetails.vlFrete.toFixed(2)}` : "-"}
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Cliente
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.cliente ?? "-"}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Typography variant="body2" color="text.secondary">
+                Cidade Destino
+              </Typography>
+              <Typography variant="subtitle1">{romaneioDetails.coleta ?? "-"}</Typography>
+            </Grid>
+          </Grid>
         </Card>
       )}
     </Box>
