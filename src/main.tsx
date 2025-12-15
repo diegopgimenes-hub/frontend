@@ -1,11 +1,9 @@
 import { ColorModeProvider } from "@/context/ColorModeContext";
-import { CssBaseline } from "@mui/material";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 
-// ✅ imports default
 import { DialogsProvider } from "@/hooks/useDialogs/DialogsProvider";
 import { NotificationsProvider } from "@/hooks/useNotifications/NotificationsProvider";
 
@@ -14,7 +12,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <ColorModeProvider>
       <DialogsProvider>
         <NotificationsProvider>
-          <CssBaseline />
           <App />
         </NotificationsProvider>
       </DialogsProvider>
