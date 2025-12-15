@@ -36,8 +36,8 @@ const DriverRomaneiosTab: React.FC<Props> = ({
         >
           {romaneios.length ? (
             romaneios.map((r) => (
-              <MenuItem key={r.codigoId} value={r.codigoId}>
-                Romaneio #{r.codigoId} — {r.dtBipEmb ?? "sem data"} {r.hrBipEmb ?? ""}
+              <MenuItem key={r.codigoId ?? `null-${Math.random()}`} value={r.codigoId ?? ""}>
+                Romaneio #{r.codigoId ?? "?"} — {r.dtBipEmb ?? "sem data"} {r.hrBipEmb ?? ""}
               </MenuItem>
             ))
           ) : (
