@@ -152,13 +152,11 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
             Detalhes do Romaneio #{romaneioDetails.codigoId}
           </Typography>
           <Divider sx={{ mb: 2 }} />
+
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "repeat(12, 1fr)",
-              },
+              gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
               gap: 2,
             }}
           >
@@ -205,7 +203,7 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
             <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
               <TextField
                 label="Data do BIP Embarque"
-                value={formatarDataHora(romaneioDetails.dtBipEmb, romaneioDetails.hrBipEmb) || ""}
+                value={formatarDataHora(romaneioDetails.dtBipEmb, romaneioDetails.hrBipEmb)}
                 fullWidth
                 size="small"
                 disabled
@@ -214,8 +212,8 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
 
             <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
               <TextField
-                label="Data da Seperação"
-                value={formatarDataHora(romaneioDetails.dtSep, romaneioDetails.hrSep) || ""}
+                label="Data da Separação"
+                value={formatarDataHora(romaneioDetails.dtSep, romaneioDetails.hrSep)}
                 fullWidth
                 size="small"
                 disabled
@@ -224,8 +222,8 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
 
             <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
               <TextField
-                label="Data do BIP de Seperação"
-                value={formatarDataHora(romaneioDetails.dtBipSep, romaneioDetails.hrBipSep) || ""}
+                label="Data do BIP de Separação"
+                value={formatarDataHora(romaneioDetails.dtBipSep, romaneioDetails.hrBipSep)}
                 fullWidth
                 size="small"
                 disabled
@@ -242,6 +240,135 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
               />
             </Box>
           </Box>
+
+          {/* NOVO BLOCO — ITENS DO ROMANEIO */}
+          {(romaneioDetails.itens ?? []).length > 0 && (
+            <Paper elevation={3} sx={{ mt: 4, p: 2, borderRadius: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Itens do Romaneio
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              {(romaneioDetails.itens ?? []).map((item, index, itensArray) => (
+                <Box
+                  key={item.codigoId ?? index}
+                  sx={{
+                    mb: 2,
+                    pb: 2,
+                    borderBottom: index < itensArray.length - 1 ? "1px solid #e0e0e0" : "none",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
+                      gap: 2,
+                    }}
+                  >
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 2" } }}>
+                      <TextField
+                        label="Código"
+                        value={item.codigoId || ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 2" } }}>
+                      <TextField
+                        label="Nº NFe"
+                        value={item.nf || ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 4" } }}>
+                      <TextField
+                        label="Chave da NFe"
+                        value={item.chaveNfe || ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 4" } }}>
+                      <TextField
+                        label="Nome do CD"
+                        value={item.nomeCd || ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 3" } }}>
+                      <TextField
+                        label="Valor da NFe"
+                        value={item.valorNf ? `R$ ${item.valorNf.toFixed(2)}` : ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 3" } }}>
+                      <TextField
+                        label="Peso Total"
+                        value={item.peso || ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                      <TextField
+                        label="Observação"
+                        value={item.obs || ""}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                      <TextField
+                        label="Remetente"
+                        value={`${item.remRazao ?? ""} (${item.remCnpj ?? ""})`}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                      <TextField
+                        label="Destinatário"
+                        value={`${item.nomeDest ?? ""} (${item.cnpj ?? ""})`}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+
+                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                      <TextField
+                        label="Município / Bairro"
+                        value={`${item.destMun ?? ""} - ${item.destBairr ?? ""}`}
+                        fullWidth
+                        size="small"
+                        disabled
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              ))}
+            </Paper>
+          )}
         </Card>
       )}
     </Box>

@@ -5,6 +5,22 @@ export interface RomaneioSimpleDTO {
   hrBipEmb: string | null;
 }
 
+export interface RomaneioItemDTO {
+  codigoId: number | null;
+  nf: string | null;
+  chaveNfe: string | null;
+  nomeCd: string | null;
+  valorNf: number | null;
+  peso: number | null;
+  obs: string | null;
+  remCnpj: string | null;
+  remRazao: string | null;
+  cnpj: string | null;
+  nomeDest: string | null;
+  destMun: string | null;
+  destBairr: string | null;
+}
+
 export interface RomaneioDTO {
   codigoId: number;
   status: string | null;
@@ -69,4 +85,6 @@ export interface RomaneioDTO {
   priorizar: string | null;
   sacApr: string | null;
   sacDtApr: string | null;
+
+  itens?: RomaneioItemDTO[];
 }
