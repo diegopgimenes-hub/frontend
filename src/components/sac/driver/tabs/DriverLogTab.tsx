@@ -9,7 +9,7 @@ export default function DriverLogTab({ driver }: Props) {
   if (!driver) return null;
 
   return (
-    <Paper sx={{ p: 2, mt: 2 }}>
+    <Paper sx={{ p: 2, mt: 2 }} elevation={3}>
       <Box
         sx={{
           display: "grid",
