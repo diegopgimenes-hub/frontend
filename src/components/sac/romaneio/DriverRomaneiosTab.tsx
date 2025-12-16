@@ -106,13 +106,16 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
         </Box>
       )}
 
-      {/* Detalhes */}
+      {/* Dados do Romaneio - Título */}
       {!loading && romaneioDetails && (
         <Card sx={{ p: 3 }}>
+          {/* Título da seção "Dados do Romaneio" */}
           <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}>
             Dados do Romaneio
           </Typography>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 2 }}>
+
+          {/* Cabeçalho do romaneio */}
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 3 }}>
             <Box
               sx={{
                 display: "grid",
@@ -185,9 +188,7 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
             </Box>
           </Paper>
 
-          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}>
-            Itens do Romaneio
-          </Typography>
+          {/* Itens do romaneio */}
           {(romaneioDetails.itens ?? []).map((item, index) => (
             <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 2 }} key={item.codigoId ?? index}>
               <Box
