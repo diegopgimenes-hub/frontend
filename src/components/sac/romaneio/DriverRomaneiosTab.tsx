@@ -6,7 +6,6 @@ import {
   Box,
   Card,
   CircularProgress,
-  Divider,
   List,
   ListItem,
   ListItemButton,
@@ -27,23 +26,6 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Adiciona keyframes de highlight dinamicamente (sem CSS externo)
-  React.useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes highlightFade {
-        0% { background-color: rgba(25, 118, 210, 0.25); transform: scale(1.02); }
-        50% { background-color: rgba(25, 118, 210, 0.15); transform: scale(1.015); }
-        100% { background-color: transparent; transform: scale(1); }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
-
-  // Busca os detalhes do romaneio pelo ID
   const fetchRomaneioDetails = async (id: number) => {
     if (!id) return;
     setLoading(true);
@@ -57,7 +39,6 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
     }
   };
 
-  // Seleciona automaticamente o primeiro romaneio ao trocar motorista
   useEffect(() => {
     if (romaneios.length > 0) {
       const primeiro = romaneios[0];
@@ -82,9 +63,9 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
 
   return (
     <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-      {/* Lista de romaneios com scroll */}
+      {/* Lista de romaneios */}
       <Paper
-        elevation={3}
+        elevation={2}
         sx={{
           maxHeight: 240,
           overflowY: "auto",
@@ -93,43 +74,23 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
       >
         <List dense>
           {romaneios.length > 0 ? (
-            romaneios.map((r) => {
-              const isSelected = selectedId === r.codigoId;
-
-              return (
-                <ListItem disablePadding key={r.codigoId ?? Math.random()}>
-                  <ListItemButton
-                    selected={isSelected}
-                    onClick={() => handleSelectRomaneio(r.codigoId!)}
-                    sx={{
-                      position: "relative",
-                      transition: "background-color 0.3s ease, transform 0.2s ease",
-                      ...(isSelected && {
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(100, 181, 246, 0.15)"
-                            : "rgba(25, 118, 210, 0.1)",
-                        animation: "highlightFade 1.5s ease",
-                        transform: "scale(1.02)",
-                      }),
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(144,202,249,0.25)"
-                            : "rgba(33,150,243,0.15)",
-                      },
-                    }}
-                  >
-                    <ListItemText
-                      primary={
+            romaneios.map((r) => (
+              <ListItem disablePadding key={r.codigoId}>
+                <ListItemButton
+                  selected={selectedId === r.codigoId}
+                  onClick={() => handleSelectRomaneio(r.codigoId!)}
+                >
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <Typography fontWeight={500}>Romaneio #{r.codigoId ?? "-"}</Typography>
-                      }
-                      secondary={formatarDataHora(r.dtBipEmb, r.hrBipEmb)}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })
+                      </Box>
+                    }
+                    secondary={formatarDataHora(r.dtBipEmb ?? undefined, r.hrBipEmb ?? undefined)}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))
           ) : (
             <ListItem>
               <ListItemText primary="Nenhum romaneio encontrado." />
@@ -138,237 +99,200 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
         </List>
       </Paper>
 
-      {/* Indicador de carregamento */}
+      {/* Loading */}
       {loading && (
         <Box sx={{ textAlign: "center", mt: 3 }}>
           <CircularProgress size={28} />
         </Box>
       )}
 
-      {/* Detalhes do romaneio selecionado */}
+      {/* Detalhes */}
       {!loading && romaneioDetails && (
         <Card sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Detalhes do Romaneio #{romaneioDetails.codigoId}
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}>
+            Dados do Romaneio
           </Typography>
-          <Divider sx={{ mb: 2 }} />
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 2 }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
+                gap: 2,
+              }}
+            >
+              <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                <TextField
+                  label="Motorista"
+                  value={romaneioDetails.motNome || ""}
+                  fullWidth
+                  size="small"
+                  disabled
+                />
+              </Box>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
-              gap: 2,
-            }}
-          >
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Status"
-                value={romaneioDetails.status || ""}
-                fullWidth
-                size="small"
-                disabled
-              />
+              <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                <TextField
+                  label="Placa"
+                  value={romaneioDetails.placaM1 || ""}
+                  fullWidth
+                  size="small"
+                  disabled
+                />
+              </Box>
+
+              <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                <TextField
+                  label="Status"
+                  value={romaneioDetails.status || ""}
+                  fullWidth
+                  size="small"
+                  disabled
+                />
+              </Box>
+
+              <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                <TextField
+                  label="Data de Embarque"
+                  value={formatarDataHora(
+                    romaneioDetails.dtBipEmb ?? undefined,
+                    romaneioDetails.hrBipEmb ?? undefined,
+                  )}
+                  fullWidth
+                  size="small"
+                  disabled
+                />
+              </Box>
+
+              <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                <TextField
+                  label="Peso Total"
+                  value={romaneioDetails.totPeso ?? ""}
+                  fullWidth
+                  size="small"
+                  disabled
+                />
+              </Box>
+
+              <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                <TextField
+                  label="Valor do Frete"
+                  value={romaneioDetails.vlFrete ? `R$ ${romaneioDetails.vlFrete.toFixed(2)}` : ""}
+                  fullWidth
+                  size="small"
+                  disabled
+                />
+              </Box>
             </Box>
+          </Paper>
 
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Tipo do Romaneio"
-                value={romaneioDetails.tipo || ""}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Tipo da Carga"
-                value={romaneioDetails.tipoCarga || ""}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Tipo do Documento"
-                value={romaneioDetails.tipoDoc || ""}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Data do BIP Embarque"
-                value={formatarDataHora(romaneioDetails.dtBipEmb, romaneioDetails.hrBipEmb)}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Data da Separação"
-                value={formatarDataHora(romaneioDetails.dtSep, romaneioDetails.hrSep)}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Data do BIP de Separação"
-                value={formatarDataHora(romaneioDetails.dtBipSep, romaneioDetails.hrBipSep)}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-              <TextField
-                label="Valor do Frete"
-                value={romaneioDetails.vlFrete || ""}
-                fullWidth
-                size="small"
-                disabled
-              />
-            </Box>
-          </Box>
-
-          {/* NOVO BLOCO — ITENS DO ROMANEIO */}
-          {(romaneioDetails.itens ?? []).length > 0 && (
-            <Paper elevation={3} sx={{ mt: 4, p: 2, borderRadius: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Itens do Romaneio
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              {(romaneioDetails.itens ?? []).map((item, index, itensArray) => (
-                <Box
-                  key={item.codigoId ?? index}
-                  sx={{
-                    mb: 2,
-                    pb: 2,
-                    borderBottom: index < itensArray.length - 1 ? "1px solid #e0e0e0" : "none",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
-                      gap: 2,
-                    }}
-                  >
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 2" } }}>
-                      <TextField
-                        label="Código"
-                        value={item.codigoId || ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 2" } }}>
-                      <TextField
-                        label="Nº NFe"
-                        value={item.nf || ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 4" } }}>
-                      <TextField
-                        label="Chave da NFe"
-                        value={item.chaveNfe || ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 4" } }}>
-                      <TextField
-                        label="Nome do CD"
-                        value={item.nomeCd || ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 3" } }}>
-                      <TextField
-                        label="Valor da NFe"
-                        value={item.valorNf ? `R$ ${item.valorNf.toFixed(2)}` : ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 3" } }}>
-                      <TextField
-                        label="Peso Total"
-                        value={item.peso || ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-                      <TextField
-                        label="Observação"
-                        value={item.obs || ""}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-                      <TextField
-                        label="Remetente"
-                        value={`${item.remRazao ?? ""} (${item.remCnpj ?? ""})`}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-                      <TextField
-                        label="Destinatário"
-                        value={`${item.nomeDest ?? ""} (${item.cnpj ?? ""})`}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-
-                    <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
-                      <TextField
-                        label="Município / Bairro"
-                        value={`${item.destMun ?? ""} - ${item.destBairr ?? ""}`}
-                        fullWidth
-                        size="small"
-                        disabled
-                      />
-                    </Box>
-                  </Box>
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}>
+            Itens do Romaneio
+          </Typography>
+          {(romaneioDetails.itens ?? []).map((item, index) => (
+            <Paper elevation={3} sx={{ p: 2, borderRadius: 2, mb: 2 }} key={item.codigoId ?? index}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "repeat(12, 1fr)" },
+                  gap: 2,
+                }}
+              >
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 2" } }}>
+                  <TextField
+                    label="Código"
+                    value={item.codigoId ?? ""}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
                 </Box>
-              ))}
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 2" } }}>
+                  <TextField label="Nº NFe" value={item.nf ?? ""} fullWidth size="small" disabled />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 4" } }}>
+                  <TextField
+                    label="Chave NFe"
+                    value={item.chaveNfe ?? ""}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 4" } }}>
+                  <TextField
+                    label="Nome do CD"
+                    value={item.nomeCd ?? ""}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 3" } }}>
+                  <TextField
+                    label="Valor da NFe"
+                    value={item.valorNf ? `R$ ${item.valorNf.toFixed(2)}` : ""}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 3" } }}>
+                  <TextField
+                    label="Peso Total"
+                    value={item.peso ?? ""}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                  <TextField
+                    label="Observação"
+                    value={item.obs ?? ""}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                  <TextField
+                    label="Remetente"
+                    value={`${item.remRazao ?? ""} (${item.remCnpj ?? ""})`}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                  <TextField
+                    label="Destinatário"
+                    value={`${item.nomeDest ?? ""} (${item.cnpj ?? ""})`}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+
+                <Box sx={{ gridColumn: { xs: "span 12", md: "span 6" } }}>
+                  <TextField
+                    label="Município / Bairro"
+                    value={`${item.destMun ?? ""} - ${item.destBairr ?? ""}`}
+                    fullWidth
+                    size="small"
+                    disabled
+                  />
+                </Box>
+              </Box>
             </Paper>
-          )}
+          ))}
         </Card>
       )}
     </Box>
