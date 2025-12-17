@@ -76,7 +76,7 @@ const DriverBoard: React.FC = () => {
       <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ mt: 2 }}>
         <Tab label="Dados do Motorista" />
         <Tab label="Romaneios do Motorista" />
-        <Tab label="Notas Fiscais" />
+        <Tab label="Itens do Romaneio" />
       </Tabs>
 
       {/* Conteúdo das abas */}
