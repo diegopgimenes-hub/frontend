@@ -14,30 +14,44 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface Props {
   selectedDriver: DriverSelectDTO | null;
   romaneios: RomaneioSimpleDTO[];
+  onSelectRomaneioDetails: (data: RomaneioDTO | null) => void;
 }
 
-const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
+const DriverRomaneiosTab: React.FC<Props> = ({
+  selectedDriver,
+  romaneios,
+  onSelectRomaneioDetails,
+}) => {
   const [romaneioDetails, setRomaneioDetails] = useState<RomaneioDTO | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchRomaneioDetails = async (id: number) => {
-    if (!id) return;
-    setLoading(true);
-    try {
-      const res = await api.get<RomaneioDTO>(`/api/romaneios/${id}`);
-      setRomaneioDetails(res.data);
-    } catch (err) {
-      console.error("Erro ao buscar detalhes do romaneio:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  /**
+   * ✅ Corrigido: useCallback garante que a função mantenha
+   * a mesma referência entre renderizações.
+   */
+  const fetchRomaneioDetails = useCallback(
+    async (id: number) => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const res = await api.get<RomaneioDTO>(`/api/romaneios/${id}`);
+        setRomaneioDetails(res.data);
+        onSelectRomaneioDetails(res.data);
+      } catch (err) {
+        console.error("Erro ao buscar detalhes do romaneio:", err);
+        onSelectRomaneioDetails(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onSelectRomaneioDetails], // ✅ dependência estável
+  );
 
   useEffect(() => {
     if (romaneios.length > 0) {
@@ -49,8 +63,9 @@ const DriverRomaneiosTab: React.FC<Props> = ({ selectedDriver, romaneios }) => {
     } else {
       setSelectedId(null);
       setRomaneioDetails(null);
+      onSelectRomaneioDetails(null);
     }
-  }, [selectedDriver, romaneios, selectedId]);
+  }, [selectedDriver, romaneios, fetchRomaneioDetails, selectedId, onSelectRomaneioDetails]);
 
   const handleSelectRomaneio = (id: number) => {
     if (!id || id === selectedId) return;

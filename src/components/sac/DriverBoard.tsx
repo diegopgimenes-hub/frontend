@@ -1,16 +1,18 @@
 import api from "@/api/axiosInstance";
 import { SearchIcon } from "@/icons/index";
 import { DriverDTO, DriverSelectDTO } from "@/types/driver";
-import { RomaneioSimpleDTO } from "@/types/romaneio";
+import { RomaneioDTO, RomaneioSimpleDTO } from "@/types/romaneio";
 import { Alert, Box, IconButton, Snackbar, Tab, Tabs, Typography } from "@mui/material";
 import React, { useState } from "react";
 import DriverDataTab from "./driver/DriverDataTab";
 import DriverSelectionDialog from "./driver/DriverSelectionDialog";
+import DriverRomaneiosItensTab from "./romaneio/DriverRomaneiosItensTab";
 import DriverRomaneiosTab from "./romaneio/DriverRomaneiosTab";
 
 const DriverBoard: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
 
+  const [romaneioDetails, setRomaneioDetails] = useState<RomaneioDTO | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<DriverSelectDTO | null>(null);
   const [driverDetails, setDriverDetails] = useState<DriverDTO | null>(null);
   const [romaneios, setRomaneios] = useState<RomaneioSimpleDTO[]>([]);
@@ -53,20 +55,25 @@ const DriverBoard: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       {/* Cabeçalho */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="h5" fontWeight="bold">
-          Quadro do Motorista{" "}
-          {selectedDriver ? (
-            <Typography component="span" color="text.secondary">
-              ({selectedDriver.nome} — CPF: {selectedDriver.cpf} — Cel: {selectedDriver.celular})
-            </Typography>
-          ) : (
-            <Typography component="span" color="text.secondary">
-              (Nenhum motorista selecionado)
-            </Typography>
-          )}
+          Quadro do Motorista
         </Typography>
-
+        {selectedDriver ? (
+          <Typography component="span" color="text.secondary">
+            {selectedDriver.nome} — CPF: {selectedDriver.cpf}
+          </Typography>
+        ) : (
+          <Typography component="span" color="text.secondary">
+            Nenhum motorista selecionado
+          </Typography>
+        )}
         <IconButton color="primary" onClick={() => setOpenDialog(true)}>
           <SearchIcon />
         </IconButton>
@@ -83,10 +90,16 @@ const DriverBoard: React.FC = () => {
       {tabValue === 0 && <DriverDataTab driver={driverDetails} />}
 
       {tabValue === 1 && (
-        <DriverRomaneiosTab selectedDriver={selectedDriver} romaneios={romaneios} />
+        <DriverRomaneiosTab
+          selectedDriver={selectedDriver}
+          romaneios={romaneios}
+          onSelectRomaneioDetails={setRomaneioDetails}
+        />
       )}
 
-      {/* Modal de seleção */}
+      {tabValue === 2 && <DriverRomaneiosItensTab romaneioDetails={romaneioDetails} />}
+
+      {/* Modal de seleção de motorista */}
       <DriverSelectionDialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
