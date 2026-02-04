@@ -61,7 +61,6 @@ export default function AppBar({ logo, title, menuOpen, onToggleMenu }: AppBarPr
 
           <Link to="/" style={{ textDecoration: "none" }}>
             <Stack direction="row" alignItems="center" spacing={1}>
-              {logo && <LogoContainer>{logo}</LogoContainer>}
               {title && (
                 <Typography
                   variant="h6"

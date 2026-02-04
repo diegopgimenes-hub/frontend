@@ -1,4 +1,5 @@
-// src/types/romaneio.ts
+import { NfEntradaDTO } from "./nfentrada";
+
 export interface RomaneioSimpleDTO {
   codigoId: number;
   dtBipEmb: string | null;
@@ -6,19 +7,48 @@ export interface RomaneioSimpleDTO {
 }
 
 export interface RomaneioItemDTO {
-  codigoId: number | null;
-  nf: string | null;
-  chaveNfe: string | null;
-  nomeCd: string | null;
-  valorNf: number | null;
-  peso: number | null;
-  obs: string | null;
-  remCnpj: string | null;
-  remRazao: string | null;
+  codigoId: number;
+  codigoDu1: number | null;
+  nf: number | null;
   cnpj: string | null;
   nomeDest: string | null;
-  destMun: string | null;
+  peso: number | null;
+  valorNf: number | null;
+  obs: string | null;
+  quant: number | null;
+  pallets: number | null;
+  caixas: number | null;
+  um: string | null;
+  descRom: string | null;
+  motDev: string | null;
+  dtEnt: string | null;
   destBairr: string | null;
+  destMun: string | null;
+  quantN1: number | null;
+  codN1: number | null;
+  remRazao: string | null;
+  emp: string | null;
+  emb: string | null;
+  reent: string | null;
+  remCnpj: string | null;
+  vlFrete: number | null;
+  chaveNfe: string | null;
+  freteVl: number | null;
+  freteReg: number | null;
+  freteKg: number | null;
+  freteFe: number | null;
+  freteCap: number | null;
+  freteInt: number | null;
+  regiaoNum: string | null;
+  freteMot: string | null;
+  fMotT: string | null;
+  destIbge: string | null;
+  pedagHr: string | null;
+  idRota: number | null;
+  seqRota: number | null;
+  codCd: string | null;
+  nomeCd: string | null;
+  nfentrada?: NfEntradaDTO | null; // ✅ novo campo
 }
 
 export interface RomaneioDTO {
@@ -85,6 +115,5 @@ export interface RomaneioDTO {
   priorizar: string | null;
   sacApr: string | null;
   sacDtApr: string | null;
-
-  itens?: RomaneioItemDTO[];
+  itens?: RomaneioItemDTO[] | null;
 }
