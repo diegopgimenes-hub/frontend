@@ -16,6 +16,8 @@ import { DialogsProvider } from "@/hooks/useDialogs/DialogsProvider";
 import { NotificationsProvider } from "@/hooks/useNotifications/NotificationsProvider";
 
 import LoginPage from "@/pages/LoginPage";
+import PixManualPage from "@/pages/PixManualPage"; // ✅ NOVO
+import ConsultarPagamento from "./pages/pagamentos/ConsultarPagamento";
 
 export default function App() {
   return (
@@ -40,6 +42,8 @@ export default function App() {
                 <Route path="users" element={<UserList />} />
                 <Route path="roles" element={<RoleList />} />
                 <Route path="sac/driver-board" element={<DriverBoard />} /> {/* ✅ relativo */}
+                <Route path="pix/manual" element={<PixManualPage />} />
+                <Route path="pagamentos/consultar" element={<ConsultarPagamento />} />
                 {/* 🚦 Rota padrão */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>

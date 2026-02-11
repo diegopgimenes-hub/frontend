@@ -4,6 +4,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import HomeIcon from "@mui/icons-material/Home";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping"; // 🚚 NOVO ícone
 import PeopleIcon from "@mui/icons-material/People";
+import QrCode2Icon from "@mui/icons-material/QrCode2";
+import SearchIcon from "@mui/icons-material/Search";
 import SecurityIcon from "@mui/icons-material/Security";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
@@ -72,6 +74,26 @@ export default function Drawer({ expanded, setExpanded, container }: DrawerProps
               <HomeIcon />
             </ListItemIcon>
             {expanded && <ListItemText primary="Home" />}
+          </ListItemButton>
+
+          <ListItemButton
+            onClick={handleNavigate("/pix/manual")}
+            selected={menuActive("/pix/manual")}
+          >
+            <ListItemIcon>
+              <QrCode2Icon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="Pix Manual" />}
+          </ListItemButton>
+
+          <ListItemButton
+            onClick={handleNavigate("/pagamentos/consultar")}
+            selected={menuActive("/pagamentos/consultar")}
+          >
+            <ListItemIcon>
+              <SearchIcon />
+            </ListItemIcon>
+            {expanded && <ListItemText primary="Consultar Pagamento" />}
           </ListItemButton>
 
           {/* CONFIGURAÇÕES DE SISTEMA */}
